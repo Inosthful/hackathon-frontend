@@ -7,57 +7,74 @@ const token = ref<string | null>(null)
 const loading = ref(false)
 const error = ref<string | null>(null)
 
-// Charger le token et l'utilisateur depuis localStorage au démarrage
+const API_URL = '/api'
+
+const apiClient = axios.create({
+  baseURL: API_URL,
+  headers: {
+    'Content-Type': 'application/json',
+  },
+})
+
+apiClient.interceptors.request.use((config) => {
+  if (token.value) {
+    config.headers.Authorization = `Bearer ${token.value}`
+  }
+  return config
+})
+
 const loadStoredAuth = () => {
   const storedToken = localStorage.getItem('moodflow_token')
   const storedUser = localStorage.getItem('moodflow_user')
 
-  if (storedToken && storedUser) {
+  if (storedToken && storedUser && storedUser !== 'undefined') {
     token.value = storedToken
-    user.value = JSON.parse(storedUser)
+    try {
+      user.value = JSON.parse(storedUser)
+    } catch (e) {
+      console.error('Failed to parse stored user, clearing storage', e)
+      localStorage.removeItem('moodflow_user')
+      localStorage.removeItem('moodflow_token')
+    }
   }
 }
 
-// Initialiser au chargement
 loadStoredAuth()
 
 export function useAuth() {
   const isAuthenticated = computed(() => !!token.value && !!user.value)
 
-  const API_URL = (import.meta.env.VITE_API_URL as string | undefined) || 'http://localhost:8000/api'
-
-  // Connexion
   const login = async (credentials: LoginCredentials): Promise<boolean> => {
     loading.value = true
     error.value = null
 
     try {
-      const response = await axios.post<AuthResponse>(`${API_URL}/auth/login`, credentials)
+      const response = await apiClient.post<{ token: string }>('/auth/login', credentials)
+      const authToken = response.data.token
 
-      const { token: authToken, user: authUser } = response.data
-
-      // Stocker le token et l'utilisateur
       token.value = authToken
-      user.value = authUser
-
       localStorage.setItem('moodflow_token', authToken)
+
+      const userResponse = await apiClient.get<{ user: User }>('/me')
+      const authUser = userResponse.data.user
+
+      user.value = authUser
       localStorage.setItem('moodflow_user', JSON.stringify(authUser))
 
       return true
     } catch (e: any) {
       error.value = e.response?.data?.message || 'Erreur lors de la connexion'
+      logout()
       return false
     } finally {
       loading.value = false
     }
   }
 
-  // Inscription
   const register = async (data: RegisterData): Promise<boolean> => {
     loading.value = true
     error.value = null
 
-    // Validation côté client
     if (data.password !== data.passwordConfirm) {
       error.value = 'Les mots de passe ne correspondent pas'
       loading.value = false
@@ -71,7 +88,7 @@ export function useAuth() {
     }
 
     try {
-      const response = await axios.post<AuthResponse>(`${API_URL}/auth/register`, {
+      const response = await apiClient.post<AuthResponse>('/auth/register', {
         lastName: data.lastName,
         firstName: data.firstName,
         email: data.email,
@@ -81,7 +98,6 @@ export function useAuth() {
 
       const { token: authToken, user: authUser } = response.data
 
-      // Stocker le token et l'utilisateur
       token.value = authToken
       user.value = authUser
 
@@ -90,27 +106,19 @@ export function useAuth() {
 
       return true
     } catch (e: any) {
-      error.value = e.response?.data?.message || 'Erreur lors de l\'inscription'
+      error.value = e.response?.data?.message || "Erreur lors de l'inscription"
       return false
     } finally {
       loading.value = false
     }
   }
 
-  // Déconnexion
   const logout = () => {
     token.value = null
     user.value = null
-
     localStorage.removeItem('moodflow_token')
     localStorage.removeItem('moodflow_user')
   }
-
-  // Récupérer le token pour les requêtes API
-  const getToken = () => token.value
-
-  // Récupérer l'utilisateur courant
-  const getCurrentUser = () => user.value
 
   return {
     user,
@@ -121,7 +129,5 @@ export function useAuth() {
     login,
     register,
     logout,
-    getToken,
-    getCurrentUser,
   }
 }

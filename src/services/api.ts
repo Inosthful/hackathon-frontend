@@ -55,7 +55,10 @@ class ApiService {
     if (startDate) params.append('startDate', startDate)
     if (endDate) params.append('endDate', endDate)
 
-    const response = await this.api.get(`/moods?${params.toString()}`)
+    const queryString = params.toString();
+    const url = queryString ? `/moods?${queryString}` : '/moods';
+
+    const response = await this.api.get(url);
     return response.data
   }
 

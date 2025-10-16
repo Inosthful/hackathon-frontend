@@ -99,16 +99,16 @@ const handleLogout = () => {
       class="bg-white dark:bg-gray-800 shadow-md border-b border-gray-200 dark:border-gray-700"
     >
       <div
-        class="max-w-7xl mx-auto px-4 py-4 flex justify-between items-center"
+        class="max-w-7xl mx-auto px-4 py-3 sm:py-4 flex flex-col sm:flex-row gap-3 sm:gap-0 justify-between items-center"
       >
-        <div class="flex items-center gap-3">
+        <div class="flex items-center gap-2 sm:gap-3">
           <div
-            class="w-10 h-10 rounded-full bg-gradient-to-r from-purple-600 to-pink-600 flex items-center justify-center text-white font-bold"
+            class="w-8 h-8 sm:w-10 sm:h-10 rounded-full bg-gradient-to-r from-purple-600 to-pink-600 flex items-center justify-center text-white font-bold text-sm sm:text-base"
           >
             {{ user?.username?.charAt(0).toUpperCase() || "U" }}
           </div>
           <div>
-            <p class="font-semibold text-gray-800 dark:text-gray-200">
+            <p class="text-sm sm:text-base font-semibold text-gray-800 dark:text-gray-200">
               {{ user?.username }}
             </p>
             <p class="text-xs text-gray-500 dark:text-gray-400">
@@ -118,7 +118,7 @@ const handleLogout = () => {
         </div>
         <button
           @click="handleLogout"
-          class="px-4 py-2 text-sm rounded-lg border-2 border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 font-medium hover:bg-gray-100 dark:hover:bg-gray-700 transition-all duration-200"
+          class="px-4 py-2 text-xs sm:text-sm rounded-lg border-2 border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 font-medium hover:bg-gray-100 dark:hover:bg-gray-700 transition-all duration-200"
         >
           Déconnexion
         </button>
@@ -126,15 +126,15 @@ const handleLogout = () => {
     </div>
 
     <!-- Contenu principal -->
-    <div class="max-w-7xl mx-auto px-4 py-8 space-y-8">
+    <div class="max-w-7xl mx-auto px-4 py-4 sm:py-6 lg:py-8 space-y-4 sm:space-y-6 lg:space-y-8">
       <!-- Header -->
-      <header class="text-center space-y-2 fade-in">
+      <header class="text-center space-y-1 sm:space-y-2 fade-in">
         <h1
-          class="text-5xl font-bold bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent"
+          class="text-3xl sm:text-4xl lg:text-5xl font-bold bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent"
         >
           MoodFlow+
         </h1>
-        <p class="text-gray-600 dark:text-gray-400 text-lg">
+        <p class="text-gray-600 dark:text-gray-400 text-base sm:text-lg">
           Ton journal d'humeur intelligent
         </p>
       </header>
@@ -143,7 +143,7 @@ const handleLogout = () => {
       <Transition name="slide-fade">
         <div
           v-if="showSuccess"
-          class="bg-green-500 text-white p-4 rounded-lg shadow-lg text-center font-medium"
+          class="bg-green-500 text-white p-3 sm:p-4 rounded-lg shadow-lg text-center font-medium text-sm sm:text-base"
         >
           ✅ Humeur enregistrée avec succès !
         </div>
@@ -152,7 +152,7 @@ const handleLogout = () => {
       <!-- Message d'erreur -->
       <div
         v-if="error"
-        class="bg-red-500 text-white p-4 rounded-lg shadow-lg text-center"
+        class="bg-red-500 text-white p-3 sm:p-4 rounded-lg shadow-lg text-center text-sm sm:text-base"
       >
         ⚠️ {{ error }}
       </div>
@@ -168,7 +168,7 @@ const handleLogout = () => {
 
       <!-- Sélecteur d'humeur -->
       <section class="fade-in" style="animation-delay: 0.2s">
-        <div class="bg-white dark:bg-gray-800 p-8 rounded-2xl shadow-xl">
+        <div class="bg-white dark:bg-gray-800 p-4 sm:p-6 lg:p-8 rounded-2xl shadow-xl">
           <MoodSelector
             :selectedMood="selectedMood"
             :disabled="loading"
@@ -177,7 +177,7 @@ const handleLogout = () => {
 
           <!-- Zone de note -->
           <Transition name="expand">
-            <div v-if="showNote" class="mt-6 space-y-4">
+            <div v-if="showNote" class="mt-4 sm:mt-6 space-y-3 sm:space-y-4">
               <div>
                 <label
                   for="mood-note"
@@ -189,22 +189,22 @@ const handleLogout = () => {
                   id="mood-note"
                   v-model="moodNote"
                   rows="3"
-                  class="w-full p-3 border-2 border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-800 dark:text-gray-200 focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all duration-200"
+                  class="w-full p-2 sm:p-3 border-2 border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-800 dark:text-gray-200 text-sm sm:text-base focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all duration-200"
                   placeholder="Qu'est-ce qui a influencé ton humeur aujourd'hui ?"
                 ></textarea>
               </div>
 
-              <div class="flex gap-4 justify-end">
+              <div class="flex flex-col sm:flex-row gap-2 sm:gap-4 justify-end">
                 <button
                   @click="cancelEdit"
-                  class="px-6 py-2 rounded-lg border-2 border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 font-medium hover:bg-gray-100 dark:hover:bg-gray-700 transition-all duration-200"
+                  class="px-4 sm:px-6 py-2 text-sm sm:text-base rounded-lg border-2 border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 font-medium hover:bg-gray-100 dark:hover:bg-gray-700 transition-all duration-200"
                 >
                   Annuler
                 </button>
                 <button
                   @click="saveMoodEntry"
                   :disabled="!selectedMood || loading"
-                  class="px-6 py-2 rounded-lg bg-gradient-to-r from-purple-600 to-pink-600 text-white font-medium shadow-lg hover:shadow-xl transform hover:scale-105 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none"
+                  class="px-4 sm:px-6 py-2 text-sm sm:text-base rounded-lg bg-gradient-to-r from-purple-600 to-pink-600 text-white font-medium shadow-lg hover:shadow-xl transform hover:scale-105 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none"
                 >
                   {{ loading ? "Enregistrement..." : "Enregistrer" }}
                 </button>
@@ -221,7 +221,7 @@ const handleLogout = () => {
         style="animation-delay: 0.3s"
       >
         <h2
-          class="text-3xl font-bold mb-6 text-gray-800 dark:text-gray-200 text-center"
+          class="text-xl sm:text-2xl lg:text-3xl font-bold mb-4 sm:mb-6 text-gray-800 dark:text-gray-200 text-center"
         >
           Tes statistiques
         </h2>
@@ -231,18 +231,18 @@ const handleLogout = () => {
       <!-- Message si pas de données -->
       <section
         v-else
-        class="text-center p-12 bg-white dark:bg-gray-800 rounded-2xl shadow-lg fade-in"
+        class="text-center p-6 sm:p-8 lg:p-12 bg-white dark:bg-gray-800 rounded-2xl shadow-lg fade-in"
         style="animation-delay: 0.3s"
       >
-        <div class="text-6xl mb-4">📝</div>
-        <p class="text-xl text-gray-600 dark:text-gray-400">
+        <div class="text-4xl sm:text-5xl lg:text-6xl mb-3 sm:mb-4">📝</div>
+        <p class="text-base sm:text-lg lg:text-xl text-gray-600 dark:text-gray-400">
           Commence à enregistrer tes humeurs pour voir tes statistiques !
         </p>
       </section>
 
       <!-- Footer -->
-      <footer class="text-center py-8 text-gray-600 dark:text-gray-400">
-        <p class="text-sm">
+      <footer class="text-center py-4 sm:py-6 lg:py-8 text-gray-600 dark:text-gray-400">
+        <p class="text-xs sm:text-sm">
           MoodFlow+ - Créé avec ❤️ pour le Hackathon Ynov 2025
         </p>
       </footer>

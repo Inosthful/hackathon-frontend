@@ -1,84 +1,89 @@
 <script setup lang="ts">
-import type { MoodEntry } from '@/types/mood'
-import { MOOD_EMOJIS, MOOD_COLORS } from '@/types/mood'
+import type { MoodEntry } from "@/types/mood";
+import { MOOD_COLORS, MOOD_EMOJIS } from "@/types/mood";
 
 interface MonthDay {
-  date: string
-  dayName: string
-  mood: MoodEntry | null
+  date: string;
+  dayName: string;
+  mood: MoodEntry | null;
 }
 
 interface Props {
-  monthDays: (MonthDay | null)[]
-  selectedDate?: string
+  monthDays: (MonthDay | null)[];
+  selectedDate?: string;
 }
 
 interface Emits {
-  (e: 'selectDate', date: string): void
+  (e: "selectDate", date: string): void;
 }
 
-defineProps<Props>()
-const emit = defineEmits<Emits>()
+defineProps<Props>();
+const emit = defineEmits<Emits>();
 
 const toISODateString = (date: Date) => {
   const year = date.getFullYear();
-  const month = (date.getMonth() + 1).toString().padStart(2, '0');
-  const day = date.getDate().toString().padStart(2, '0');
+  const month = (date.getMonth() + 1).toString().padStart(2, "0");
+  const day = date.getDate().toString().padStart(2, "0");
   return `${year}-${month}-${day}`;
-}
+};
 
-const isToday = (dateStr: string) => {
-  return dateStr === toISODateString(new Date())
-}
+const isToday = (dateStr: string) => dateStr === toISODateString(new Date());
 
-const selectDay = (date: string) => {
-  emit('selectDate', date)
-}
+const selectDay = (date: string) => emit("selectDate", date);
 </script>
 
 <template>
-  <div class="month-view bg-white dark:bg-gray-800 p-4 sm:p-6 rounded-2xl shadow-xl">
-    <!-- En-têtes des jours de la semaine -->
-    <div class="grid grid-cols-7 gap-1 sm:gap-2 mb-2 sm:mb-4">
+  <div
+    class="month-view bg-white/70 dark:bg-gray-800/70 backdrop-blur-xl p-5 sm:p-8 rounded-3xl shadow-2xl border border-gray-200/50 dark:border-gray-700/40 transition-all duration-300"
+  >
+    <!-- En-têtes des jours -->
+    <div class="grid grid-cols-7 gap-2 mb-4">
       <div
         v-for="day in ['Lun', 'Mar', 'Mer', 'Jeu', 'Ven', 'Sam', 'Dim']"
         :key="day"
-        class="text-center text-xs sm:text-sm font-semibold text-gray-600 dark:text-gray-400 uppercase py-2"
+        class="text-center text-xs sm:text-sm font-semibold text-gray-600 dark:text-gray-400 uppercase tracking-wide"
       >
         {{ day }}
       </div>
     </div>
 
     <!-- Grille du calendrier -->
-    <div class="grid grid-cols-7 gap-1 sm:gap-2">
+    <div class="grid grid-cols-7 gap-2">
       <template v-for="(day, index) in monthDays" :key="index">
-        <!-- Jour vide (alignement) -->
+        <!-- Jour vide -->
         <div v-if="!day" class="aspect-square"></div>
 
-        <!-- Jour avec données -->
+        <!-- Jour -->
         <div
           v-else
           @click="selectDay(day.date)"
           :class="[
-            'month-day-card',
-            'cursor-pointer transition-all duration-300',
-            'p-2 sm:p-3 rounded-lg text-center',
-            'bg-white dark:bg-gray-700 shadow-md hover:shadow-lg',
-            'border-2',
-            'aspect-square flex flex-col items-center justify-center',
-            isToday(day.date) && 'border-blue-500 ring-1 sm:ring-2 ring-blue-300',
-            selectedDate === day.date && 'ring-2 sm:ring-4 ring-purple-300',
-            !isToday(day.date) && !day.mood && 'border-gray-200 dark:border-gray-600',
+            'cursor-pointer transition-all duration-300 ease-out',
+            'rounded-2xl aspect-square flex flex-col items-center justify-center',
+            'border shadow-md hover:shadow-lg',
+            'bg-white/60 dark:bg-gray-700/60 backdrop-blur-sm',
+            'hover:scale-105 active:scale-95',
+            isToday(day.date) && 'ring-2 ring-[#8FD9D6]/50 border-[#8FD9D6]',
+            selectedDate === day.date &&
+              'ring-2 ring-[#B2E0B4]/60 border-[#B2E0B4]',
+            !isToday(day.date) &&
+              !selectedDate &&
+              'border-gray-200 dark:border-gray-600',
           ]"
           :style="{
-            borderColor: day.mood && !isToday(day.date) ? MOOD_COLORS[day.mood.mood] : undefined
+            borderColor:
+              day.mood && !isToday(day.date)
+                ? MOOD_COLORS[day.mood.mood]
+                : undefined,
           }"
         >
-          <div class="text-xs sm:text-sm font-bold text-gray-800 dark:text-gray-200 mb-1">
+          <div
+            class="text-xs sm:text-sm font-semibold text-gray-800 dark:text-gray-200 mb-1"
+          >
             {{ new Date(day.date).getDate() }}
           </div>
           <div class="text-lg sm:text-2xl md:text-3xl">
-            {{ day.mood ? MOOD_EMOJIS[day.mood.mood] : '—' }}
+            {{ day.mood ? MOOD_EMOJIS[day.mood.mood] : "—" }}
           </div>
         </div>
       </template>
@@ -87,17 +92,8 @@ const selectDay = (date: string) => {
 </template>
 
 <style scoped>
-.month-day-card:hover {
-  transform: scale(1.05);
-}
-
-.month-day-card:active {
-  transform: scale(0.98);
-}
-
-/* Animation d'apparition */
 .month-view {
-  animation: fadeIn 0.5s ease-out;
+  animation: fadeIn 0.6s ease-out;
 }
 
 @keyframes fadeIn {

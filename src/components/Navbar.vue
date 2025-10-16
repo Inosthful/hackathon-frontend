@@ -3,12 +3,10 @@ import { useAuth } from "@/composables/useAuth";
 import { useRouter } from "vue-router";
 import ThemeToggle from "./ThemeToggle.vue";
 
-const router = useRouter();
 const { user, logout } = useAuth();
 
 const handleLogout = () => {
   logout();
-  router.push("/login");
 };
 </script>
 

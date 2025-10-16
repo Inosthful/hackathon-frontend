@@ -1,5 +1,6 @@
 import { ref, computed } from 'vue'
 import axios from 'axios'
+import { useRouter } from 'vue-router'
 import type { User, LoginCredentials, RegisterData, AuthResponse } from '@/types/auth'
 
 const user = ref<User | null>(null)
@@ -43,6 +44,7 @@ loadStoredAuth()
 
 export function useAuth() {
   const isAuthenticated = computed(() => !!token.value && !!user.value)
+  const router = useRouter();
 
   const login = async (credentials: LoginCredentials): Promise<boolean> => {
     loading.value = true
@@ -118,6 +120,7 @@ export function useAuth() {
     user.value = null
     localStorage.removeItem('moodflow_token')
     localStorage.removeItem('moodflow_user')
+    router.push('/login');
   }
 
   const fetchUser = async () => {

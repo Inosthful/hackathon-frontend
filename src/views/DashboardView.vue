@@ -185,17 +185,6 @@ const handlePopupSave = async (data: { mood: MoodType; note?: string }) => {
           ✅ Humeur enregistrée avec succès !
         </div>
       </Transition>
-
-      <!-- Message de succès (changement d'email) -->
-      <Transition name="slide-fade">
-        <div
-          v-if="emailChangedSuccessMessage"
-          class="bg-green-500 text-white p-3 sm:p-4 rounded-lg shadow-lg text-center font-medium text-sm sm:text-base"
-        >
-          ✅ {{ emailChangedSuccessMessage }}
-        </div>
-      </Transition>
-
       <div
         v-if="error"
         class="bg-red-500 text-white p-3 sm:p-4 rounded-lg shadow-lg text-center text-sm sm:text-base"

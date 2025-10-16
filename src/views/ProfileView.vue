@@ -3,7 +3,7 @@ import { ref, onMounted, computed } from 'vue';
 import { useAuth } from '@/composables/useAuth';
 import { useRouter } from 'vue-router';
 
-const { user, fetchUser, updateUser, requestEmailChange, changePassword, deleteAccount } = useAuth();
+const { user, logout, fetchUser, updateUser, requestEmailChange, changePassword, deleteAccount } = useAuth();
 const router = useRouter();
 
 const formData = ref({
@@ -86,7 +86,10 @@ const handleEmailChange = async () => {
     await requestEmailChange(newEmail.value);
     emailChangeSuccess.value = 'Un e-mail de confirmation a été envoyé à votre nouvelle adresse.';
     newEmail.value = '';
-    setTimeout(() => emailChangeSuccess.value = '', 4000);
+    setTimeout(() => {
+      emailChangeSuccess.value = '';
+      logout(); // Log out the user after 5 seconds
+    }, 5000);
   } catch (error: any) {
     const backendMessage = error.response?.data?.message;
     const errorMap: { [key: string]: string } = {

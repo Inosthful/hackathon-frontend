@@ -1,5 +1,3 @@
-// Composable pour gérer l'authentification
-
 import { ref, computed } from 'vue'
 import axios from 'axios'
 import type { User, LoginCredentials, RegisterData, AuthResponse } from '@/types/auth'
@@ -9,7 +7,6 @@ const token = ref<string | null>(null)
 const loading = ref(false)
 const error = ref<string | null>(null)
 
-// Charger le token et l'utilisateur depuis localStorage au démarrage
 const loadStoredAuth = () => {
   const storedToken = localStorage.getItem('moodflow_token')
   const storedUser = localStorage.getItem('moodflow_user')

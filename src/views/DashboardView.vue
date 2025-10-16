@@ -7,7 +7,7 @@ import { useRouter } from "vue-router";
 import MoodChart from "../components/MoodChart.vue";
 import MoodSelector from "../components/MoodSelector.vue";
 import MoodPopup from "../components/MoodPopup.vue";
-import ThemeToggle from "../components/ThemeToggle.vue"; // 👈 AJOUTÉ
+import ThemeToggle from "../components/ThemeToggle.vue";
 
 import WeekView from "../components/WeekView.vue";
 import MonthView from "../components/MonthView.vue";
@@ -16,7 +16,7 @@ import WeekSelector from "../components/WeekSelector.vue";
 const router = useRouter();
 const { user, logout } = useAuth();
 
-const { loading, error, fetchMoodEntries, saveMood, getWeekMoods, getMonthMoods, stats, hasTodayMood } =
+const { loading, error, fetchMoodEntries, saveMood, getWeekMoods, stats, moodEntries, getMonthMoods, hasTodayMood } =
   useMoodData();
 
 const toISODateString = (date: Date) => {
@@ -26,13 +26,25 @@ const toISODateString = (date: Date) => {
   return `${year}-${month}-${day}`;
 };
 
-const selectedDate = ref<string>(toISODateString(new Date()));
+const toUTCISODateString = (date: Date) => {
+  const year = date.getUTCFullYear();
+  const month = (date.getUTCMonth() + 1).toString().padStart(2, "0");
+  const day = date.getUTCDate().toString().padStart(2, "0");
+  return `${year}-${month}-${day}`;
+};
+
+const selectedDate = ref<string>(toUTCISODateString(new Date()));
 const selectedMood = ref<MoodType | undefined>();
 const showNote = ref(false);
 const moodNote = ref("");
 const showSuccess = ref(false);
 const showMoodPopup = ref(false);
-const viewMode = ref<'week' | 'month'>('week'); // Vue par défaut : semaine
+const viewMode = ref<'week' | 'month'>('week');
+
+const selectedMoodTime = computed(() => {
+  if (!selectedMood.value || !selectedMood.value.beginAt) return null;
+  return new Date(selectedMood.value.beginAt).toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' });
+});
 
 const weekDays = computed(() => getWeekMoods());
 const monthDays = computed(() => getMonthMoods());
@@ -48,7 +60,6 @@ onMounted(async () => {
     moodNote.value = currentDayMood.value.note || "";
   }
 
-  // Afficher la popup si aucune humeur n'a été enregistrée aujourd'hui
   if (!hasTodayMood()) {
     showMoodPopup.value = true;
   }
@@ -60,17 +71,12 @@ const handleMoodSelect = (mood: MoodType) => {
 };
 
 const handleDateSelect = (date: string) => {
-  selectedDate.value = date;
-  const dayMood = weekDays.value.find((day) => day.date === date)?.mood;
-  if (dayMood) {
-    selectedMood.value = dayMood.mood;
-    moodNote.value = dayMood.note || "";
-    showNote.value = true;
-  } else {
-    selectedMood.value = undefined;
-    moodNote.value = "";
-    showNote.value = false;
-  }
+  selectedDate.value = toUTCISODateString(new Date(date));
+  const dayMood = weekDays.value.find((day) => day.date === selectedDate.value)?.mood;
+  // On réinitialise toujours pour forcer une sélection manuelle
+  selectedMood.value = dayMood?.mood;
+  moodNote.value = dayMood?.note || "";
+  showNote.value = !!dayMood; // Afficher la note si un mood existe
 };
 
 const saveMoodEntry = async () => {
@@ -81,6 +87,7 @@ const saveMoodEntry = async () => {
       date: selectedDate.value,
       mood: selectedMood.value,
       note: moodNote.value || undefined,
+      beginAt: new Date().toISOString(), // Ajout de l'heure exacte
     });
 
     showSuccess.value = true;

@@ -2,10 +2,13 @@ import { createRouter, createWebHistory } from 'vue-router'
 import type { RouteRecordRaw } from 'vue-router'
 import { useAuth } from '@/composables/useAuth'
 
+// 🔧 MODE DEV : Mettre à true pour accéder au dashboard sans authentification
+const DEV_MODE = true
+
 const routes: RouteRecordRaw[] = [
   {
     path: '/',
-    redirect: '/login',
+    redirect: DEV_MODE ? '/dashboard' : '/login',
   },
   {
     path: '/login',
@@ -34,6 +37,12 @@ const router = createRouter({
 
 // Navigation guard pour protéger les routes
 router.beforeEach((to, _from, next) => {
+  // En mode DEV, on bypass l'authentification
+  if (DEV_MODE) {
+    next()
+    return
+  }
+
   const { isAuthenticated } = useAuth()
 
   // Routes nécessitant une authentification

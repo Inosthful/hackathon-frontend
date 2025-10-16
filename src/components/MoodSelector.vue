@@ -25,10 +25,10 @@ const selectMood = (mood: MoodType) => {
 
 <template>
   <div class="mood-selector">
-    <h3 class="text-xl font-semibold mb-4 text-gray-800 dark:text-gray-200">
+    <h3 class="text-base sm:text-lg lg:text-xl font-semibold mb-3 sm:mb-4 text-gray-800 dark:text-gray-200">
       Comment te sens-tu aujourd'hui ?
     </h3>
-    <div class="flex gap-4 justify-center flex-wrap">
+    <div class="flex gap-2 sm:gap-3 lg:gap-4 justify-center flex-wrap">
       <button
         v-for="mood in moods"
         :key="mood"
@@ -37,8 +37,8 @@ const selectMood = (mood: MoodType) => {
         :class="[
           'mood-button',
           'transition-all duration-300 transform hover:scale-110',
-          'flex flex-col items-center gap-2 p-4 rounded-2xl',
-          'border-4 border-transparent',
+          'flex flex-col items-center gap-1 sm:gap-2 p-2 sm:p-3 lg:p-4 rounded-xl sm:rounded-2xl',
+          'border-2 sm:border-4 border-transparent',
           'bg-white dark:bg-gray-800 shadow-lg hover:shadow-xl',
           selectedMood === mood && 'border-current scale-105',
           disabled && 'opacity-50 cursor-not-allowed'
@@ -47,9 +47,9 @@ const selectMood = (mood: MoodType) => {
           borderColor: selectedMood === mood ? MOOD_COLORS[mood] : 'transparent'
         }"
       >
-        <span class="text-5xl">{{ MOOD_EMOJIS[mood] }}</span>
+        <span class="text-3xl sm:text-4xl lg:text-5xl">{{ MOOD_EMOJIS[mood] }}</span>
         <span
-          class="text-sm font-medium"
+          class="text-xs sm:text-sm font-medium"
           :style="{ color: MOOD_COLORS[mood] }"
         >
           {{ MOOD_LABELS[mood] }}

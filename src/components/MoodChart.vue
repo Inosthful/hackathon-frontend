@@ -97,45 +97,45 @@ const trendText = computed(() => {
 </script>
 
 <template>
-  <div class="mood-chart space-y-6">
+  <div class="mood-chart space-y-4 sm:space-y-6">
     <!-- Statistiques générales -->
-    <div class="stats-grid grid grid-cols-1 md:grid-cols-3 gap-4">
-      <div class="stat-card bg-white dark:bg-gray-800 p-6 rounded-xl shadow-lg">
-        <div class="text-3xl mb-2">📊</div>
-        <div class="text-2xl font-bold text-gray-800 dark:text-gray-200">
+    <div class="stats-grid grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-4">
+      <div class="stat-card bg-white dark:bg-gray-800 p-4 sm:p-6 rounded-xl shadow-lg">
+        <div class="text-2xl sm:text-3xl mb-1 sm:mb-2">📊</div>
+        <div class="text-xl sm:text-2xl font-bold text-gray-800 dark:text-gray-200">
           {{ stats.totalEntries }}
         </div>
-        <div class="text-sm text-gray-600 dark:text-gray-400">Entrées totales</div>
+        <div class="text-xs sm:text-sm text-gray-600 dark:text-gray-400">Entrées totales</div>
       </div>
 
-      <div class="stat-card bg-white dark:bg-gray-800 p-6 rounded-xl shadow-lg">
-        <div class="text-3xl mb-2">{{ trendIcon }}</div>
-        <div class="text-2xl font-bold text-gray-800 dark:text-gray-200">
+      <div class="stat-card bg-white dark:bg-gray-800 p-4 sm:p-6 rounded-xl shadow-lg">
+        <div class="text-2xl sm:text-3xl mb-1 sm:mb-2">{{ trendIcon }}</div>
+        <div class="text-xl sm:text-2xl font-bold text-gray-800 dark:text-gray-200">
           {{ trendText }}
         </div>
-        <div class="text-sm text-gray-600 dark:text-gray-400">Tendance de la semaine</div>
+        <div class="text-xs sm:text-sm text-gray-600 dark:text-gray-400">Tendance de la semaine</div>
       </div>
 
-      <div class="stat-card bg-white dark:bg-gray-800 p-6 rounded-xl shadow-lg">
-        <div class="text-3xl mb-2">⭐</div>
-        <div class="text-2xl font-bold text-gray-800 dark:text-gray-200">
+      <div class="stat-card bg-white dark:bg-gray-800 p-4 sm:p-6 rounded-xl shadow-lg">
+        <div class="text-2xl sm:text-3xl mb-1 sm:mb-2">⭐</div>
+        <div class="text-xl sm:text-2xl font-bold text-gray-800 dark:text-gray-200">
           {{ MOOD_LABELS[stats.mostFrequentMood] }}
         </div>
-        <div class="text-sm text-gray-600 dark:text-gray-400">Humeur dominante</div>
+        <div class="text-xs sm:text-sm text-gray-600 dark:text-gray-400">Humeur dominante</div>
       </div>
     </div>
 
     <!-- Graphiques -->
-    <div class="charts-grid grid grid-cols-1 lg:grid-cols-2 gap-6">
-      <div class="chart-container bg-white dark:bg-gray-800 p-6 rounded-xl shadow-lg">
-        <h4 class="text-lg font-semibold mb-4 text-gray-800 dark:text-gray-200">
+    <div class="charts-grid grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6">
+      <div class="chart-container bg-white dark:bg-gray-800 p-4 sm:p-6 rounded-xl shadow-lg">
+        <h4 class="text-base sm:text-lg font-semibold mb-3 sm:mb-4 text-gray-800 dark:text-gray-200">
           Distribution des humeurs
         </h4>
         <Doughnut :data="doughnutData" :options="chartOptions" />
       </div>
 
-      <div class="chart-container bg-white dark:bg-gray-800 p-6 rounded-xl shadow-lg">
-        <h4 class="text-lg font-semibold mb-4 text-gray-800 dark:text-gray-200">
+      <div class="chart-container bg-white dark:bg-gray-800 p-4 sm:p-6 rounded-xl shadow-lg">
+        <h4 class="text-base sm:text-lg font-semibold mb-3 sm:mb-4 text-gray-800 dark:text-gray-200">
           Fréquence par humeur
         </h4>
         <Bar :data="barData" :options="barOptions" />

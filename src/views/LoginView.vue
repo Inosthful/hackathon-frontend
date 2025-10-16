@@ -116,14 +116,6 @@ const handleLogin = async () => {
             </router-link>
           </p>
         </div>
-
-        <!-- Mode développement -->
-        <div class="text-center text-xs text-gray-500 dark:text-gray-500">
-          <p>
-            Mode développement : tu peux utiliser n'importe quel email/mot de
-            passe
-          </p>
-        </div>
       </div>
     </div>
   </div>

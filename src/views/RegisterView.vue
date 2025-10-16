@@ -8,6 +8,7 @@ const router = useRouter()
 const { register, loading, error } = useAuth()
 
 const step = ref(1)
+const registrationSuccessMessage = ref('');
 
 const formData = ref<RegisterData>({
   lastName: '',
@@ -19,12 +20,29 @@ const formData = ref<RegisterData>({
 })
 
 const nextStep = () => {
+  error.value = null; // Clear previous errors
+
   // Basic validation for step 1
-  if (formData.value.firstName && formData.value.lastName && formData.value.email && formData.value.birthDate) {
-    step.value = 2
-  } else {
-    error.value = 'Veuillez remplir tous les champs.'
+  if (!formData.value.firstName || !formData.value.lastName || !formData.value.email || !formData.value.birthDate) {
+    error.value = 'Veuillez remplir tous les champs.';
+    return;
   }
+
+  // Age validation
+  const birthDate = new Date(formData.value.birthDate);
+  const today = new Date();
+  let age = today.getFullYear() - birthDate.getFullYear();
+  const m = today.getMonth() - birthDate.getMonth();
+  if (m < 0 || (m === 0 && today.getDate() < birthDate.getDate())) {
+    age--;
+  }
+
+  if (age < 12) {
+    error.value = 'Vous devez avoir au moins 12 ans pour vous inscrire.';
+    return;
+  }
+
+  step.value = 2;
 }
 
 const prevStep = () => {
@@ -35,7 +53,10 @@ const handleRegister = async () => {
   const success = await register(formData.value)
 
   if (success) {
-    router.push('/dashboard')
+    registrationSuccessMessage.value = 'Un email a été envoyé à votre adresse email afin de finaliser la création de votre compte.';
+    setTimeout(() => {
+      router.push('/login');
+    }, 5000);
   }
 }
 </script>
@@ -62,6 +83,16 @@ const handleRegister = async () => {
             class="bg-red-100 dark:bg-red-900/20 border-l-4 border-red-500 p-3 sm:p-4 rounded"
           >
             <p class="text-red-700 dark:text-red-400 text-xs sm:text-sm">{{ error }}</p>
+          </div>
+        </Transition>
+
+        <!-- Registration Success Message -->
+        <Transition name="slide-fade">
+          <div
+            v-if="registrationSuccessMessage"
+            class="bg-green-100 dark:bg-green-900/20 border-l-4 border-green-500 p-3 sm:p-4 rounded"
+          >
+            <p class="text-green-700 dark:text-green-400 text-xs sm:text-sm">{{ registrationSuccessMessage }}</p>
           </div>
         </Transition>
 
@@ -153,7 +184,7 @@ const handleRegister = async () => {
                 v-model="formData.password"
                 type="password"
                 required
-                minlength="6"
+                minlength="8"
                 placeholder="••••••••"
                 class="w-full px-3 sm:px-4 py-2 sm:py-3 text-sm sm:text-base border-2 border-gray-300 dark:border-gray-600 rounded-lg
                        bg-white dark:bg-gray-700 text-gray-800 dark:text-gray-200
@@ -161,7 +192,7 @@ const handleRegister = async () => {
                        transition-all duration-200"
               />
               <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">
-                Au moins 6 caractères
+                Au moins 8 caractères
               </p>
             </div>
 
@@ -175,7 +206,7 @@ const handleRegister = async () => {
                 v-model="formData.passwordConfirm"
                 type="password"
                 required
-                minlength="6"
+                minlength="8"
                 placeholder="••••••••"
                 class="w-full px-3 sm:px-4 py-2 sm:py-3 text-sm sm:text-base border-2 border-gray-300 dark:border-gray-600 rounded-lg
                        bg-white dark:bg-gray-700 text-gray-800 dark:text-gray-200

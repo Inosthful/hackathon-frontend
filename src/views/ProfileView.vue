@@ -106,9 +106,15 @@ const handleEmailChange = async () => {
 const handlePasswordChange = async () => {
   if (!currentPassword.value || !newPassword.value) {
     passwordChangeError.value = 'Veuillez remplir tous les champs.';
-    setTimeout(() => passwordChangeError.value = '', 5000);
     return;
   }
+
+  const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^&*()_+\-=[\]{};':"\\|,.<>\/?]).{8,}$/;
+  if (!passwordRegex.test(newPassword.value)) {
+    passwordChangeError.value = 'Le nouveau mot de passe doit contenir au moins 8 caractères, une majuscule, une minuscule, un chiffre et un caractère spécial.';
+    return;
+  }
+
   passwordChangeLoading.value = true;
   passwordChangeSuccess.value = '';
   passwordChangeError.value = '';

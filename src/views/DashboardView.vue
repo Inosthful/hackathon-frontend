@@ -176,9 +176,16 @@ const handlePopupSave = async (data: { mood: MoodType; note?: string }) => {
         </div>
 
         <div class="flex items-center gap-4">
+          <router-link to="/profile">
+            <button
+              class="px-4 py-2 text-xs sm:text-sm rounded-lg bg-purple-600 text-white font-medium hover:bg-purple-700 transition-all duration-200"
+            >
+              Profil
+            </button>
+          </router-link>
           <button
             @click="handleLogout"
-            class="px-4 py-2 text-xs sm:text-sm rounded-lg border-2 border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 font-medium hover:bg-gray-100 dark:hover:bg-gray-700 transition-all duration-200"
+            class="px-4 py-2 text-xs sm:text-sm rounded-lg bg-pink-600 text-white font-medium hover:bg-pink-700 transition-all duration-200"
           >
             Déconnexion
           </button>

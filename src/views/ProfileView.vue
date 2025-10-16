@@ -3,7 +3,7 @@ import { ref, onMounted, computed } from 'vue';
 import { useAuth } from '@/composables/useAuth';
 import { useRouter } from 'vue-router';
 
-const { user, fetchUser, updateUser } = useAuth();
+const { user, fetchUser, updateUser, requestEmailChange } = useAuth();
 const router = useRouter();
 
 const formData = ref({
@@ -11,6 +11,11 @@ const formData = ref({
   prenom: '',
   dateAnniversaire: '',
 });
+
+const newEmail = ref('');
+const emailChangeLoading = ref(false);
+const emailChangeSuccess = ref('');
+const emailChangeError = ref('');
 
 const loading = ref(false);
 const successMessage = ref('');
@@ -52,6 +57,30 @@ const handleSubmit = async () => {
     setTimeout(() => errorMessage.value = '', 4000);
   } finally {
     loading.value = false;
+  }
+};
+
+const handleEmailChange = async () => {
+  if (!newEmail.value) {
+    emailChangeError.value = 'Veuillez saisir une nouvelle adresse e-mail.';
+    setTimeout(() => emailChangeError.value = '', 4000);
+    return;
+  }
+  emailChangeLoading.value = true;
+  emailChangeSuccess.value = '';
+  emailChangeError.value = '';
+
+  try {
+    await requestEmailChange(newEmail.value);
+    emailChangeSuccess.value = 'Un e-mail de confirmation a été envoyé à votre nouvelle adresse.';
+    newEmail.value = '';
+    setTimeout(() => emailChangeSuccess.value = '', 4000);
+  } catch (error) {
+    emailChangeError.value = 'Une erreur est survenue lors de la demande de changement d\'e-mail.';
+    console.error(error);
+    setTimeout(() => emailChangeError.value = '', 4000);
+  } finally {
+    emailChangeLoading.value = false;
   }
 };
 
@@ -113,26 +142,42 @@ const goBack = () => {
             <form @submit.prevent="handleSubmit" class="space-y-6">
               <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div class="form-group">
-                  <label for="prenom">Prénom</label>
-                  <input type="text" id="prenom" v-model="formData.prenom" placeholder="Votre prénom" />
+                  <label for="prenom" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Prénom</label>
+                  <input type="text" id="prenom" v-model="formData.prenom" placeholder="Votre prénom" class="w-full p-3 border-2 border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-800 dark:text-gray-200 focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all duration-200" />
                 </div>
                 <div class="form-group">
-                  <label for="nom">Nom</label>
-                  <input type="text" id="nom" v-model="formData.nom" placeholder="Votre nom" />
+                  <label for="nom" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Nom</label>
+                  <input type="text" id="nom" v-model="formData.nom" placeholder="Votre nom" class="w-full p-3 border-2 border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-800 dark:text-gray-200 focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all duration-200" />
                 </div>
               </div>
               <div class="form-group">
-                <label for="dateAnniversaire">Date de naissance</label>
-                <input type="date" id="dateAnniversaire" v-model="formData.dateAnniversaire" />
+                <label for="dateAnniversaire" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Date de naissance</label>
+                <input type="date" id="dateAnniversaire" v-model="formData.dateAnniversaire" class="w-full p-3 border-2 border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-800 dark:text-gray-200 focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all duration-200" />
               </div>
 
               <div class="pt-6 flex flex-col-reverse sm:flex-row sm:justify-end sm:items-center gap-4">
-                <button type="button" @click="goBack" class="btn btn-secondary">
+                <button type="button" @click="goBack" class="px-4 py-2 text-xs sm:text-sm rounded-lg bg-gray-300 text-gray-800 font-medium hover:bg-gray-400 transition-all duration-200">
                   Retour
                 </button>
-                <button type="submit" :disabled="loading" class="btn btn-primary">
+                <button type="submit" :disabled="loading" class="px-4 py-2 text-xs sm:text-sm rounded-lg bg-purple-600 text-white font-medium hover:bg-purple-700 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed">
                   <span v-if="loading">Sauvegarde...</span>
                   <span v-else>Sauvegarder</span>
+                </button>
+              </div>
+            </form>
+
+            <hr class="my-8 border-gray-200/50 dark:border-gray-700/50">
+
+            <h3 class="text-2xl font-bold text-gray-800 dark:text-white mb-6">Changer mon adresse e-mail</h3>
+            <form @submit.prevent="handleEmailChange" class="space-y-6">
+              <div class="form-group">
+                <label for="new-email" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Nouvelle adresse e-mail</label>
+                <input type="email" id="new-email" v-model="newEmail" placeholder="nouvel.email@example.com" class="w-full p-3 border-2 border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-800 dark:text-gray-200 focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all duration-200" />
+              </div>
+              <div class="pt-6 flex justify-end">
+                <button type="submit" :disabled="emailChangeLoading" class="px-4 py-2 text-xs sm:text-sm rounded-lg bg-purple-600 text-white font-medium hover:bg-purple-700 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed">
+                  <span v-if="emailChangeLoading">Envoi...</span>
+                  <span v-else>Recevoir l'e-mail de confirmation</span>
                 </button>
               </div>
             </form>
@@ -146,6 +191,16 @@ const goBack = () => {
                 <svg v-if="successMessage" class="w-6 h-6 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
                 <svg v-if="errorMessage" class="w-6 h-6 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
                 <span>{{ successMessage || errorMessage }}</span>
+            </div>
+        </div>
+      </transition>
+
+      <transition name="slide-up">
+        <div v-if="emailChangeSuccess || emailChangeError" class="fixed bottom-24 right-10 max-w-sm w-full z-50">
+            <div :class="emailChangeSuccess ? 'bg-blue-500' : 'bg-red-500'" class="text-white p-4 rounded-xl shadow-2xl flex items-center">
+                <svg v-if="emailChangeSuccess" class="w-6 h-6 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                <svg v-if="emailChangeError" class="w-6 h-6 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                <span>{{ emailChangeSuccess || emailChangeError }}</span>
             </div>
         </div>
       </transition>

@@ -145,6 +145,10 @@ export function useAuth() {
     localStorage.setItem('moodflow_user', JSON.stringify(user.value));
   };
 
+  const requestEmailChange = async (email: string) => {
+    return apiClient.post('/user/request-email-change', { email });
+  };
+
   return {
     user,
     token,
@@ -156,5 +160,6 @@ export function useAuth() {
     logout,
     fetchUser,
     updateUser,
+    requestEmailChange,
   }
 }

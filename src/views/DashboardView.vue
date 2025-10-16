@@ -1,12 +1,13 @@
 <script setup lang="ts">
-import { ref, onMounted, computed } from "vue";
-import { useRouter } from "vue-router";
-import { useMoodData } from "@/composables/useMoodData";
 import { useAuth } from "@/composables/useAuth";
-import MoodSelector from "../components/MoodSelector.vue";
-import WeekView from "../components/WeekView.vue";
-import MoodChart from "../components/MoodChart.vue";
+import { useMoodData } from "@/composables/useMoodData";
 import type { MoodType } from "@/types/mood";
+import { computed, onMounted, ref } from "vue";
+import { useRouter } from "vue-router";
+import MoodChart from "../components/MoodChart.vue";
+import MoodSelector from "../components/MoodSelector.vue";
+import ThemeToggle from "../components/ThemeToggle.vue"; // 👈 AJOUTÉ
+import WeekView from "../components/WeekView.vue";
 
 const router = useRouter();
 const { user, logout } = useAuth();
@@ -94,7 +95,6 @@ const handleLogout = () => {
   <div
     class="dashboard min-h-screen bg-gradient-to-br from-purple-50 to-pink-50 dark:from-gray-900 dark:to-gray-800 transition-colors duration-300"
   >
-    <!-- Top Bar avec info utilisateur -->
     <div
       class="bg-white dark:bg-gray-800 shadow-md border-b border-gray-200 dark:border-gray-700"
     >
@@ -108,7 +108,9 @@ const handleLogout = () => {
             {{ user?.username?.charAt(0).toUpperCase() || "U" }}
           </div>
           <div>
-            <p class="text-sm sm:text-base font-semibold text-gray-800 dark:text-gray-200">
+            <p
+              class="text-sm sm:text-base font-semibold text-gray-800 dark:text-gray-200"
+            >
               {{ user?.username }}
             </p>
             <p class="text-xs text-gray-500 dark:text-gray-400">
@@ -116,18 +118,23 @@ const handleLogout = () => {
             </p>
           </div>
         </div>
-        <button
-          @click="handleLogout"
-          class="px-4 py-2 text-xs sm:text-sm rounded-lg border-2 border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 font-medium hover:bg-gray-100 dark:hover:bg-gray-700 transition-all duration-200"
-        >
-          Déconnexion
-        </button>
+
+        <div class="flex items-center gap-4">
+          <button
+            @click="handleLogout"
+            class="px-4 py-2 text-xs sm:text-sm rounded-lg border-2 border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 font-medium hover:bg-gray-100 dark:hover:bg-gray-700 transition-all duration-200"
+          >
+            Déconnexion
+          </button>
+
+          <ThemeToggle />
+        </div>
       </div>
     </div>
 
-    <!-- Contenu principal -->
-    <div class="max-w-7xl mx-auto px-4 py-4 sm:py-6 lg:py-8 space-y-4 sm:space-y-6 lg:space-y-8">
-      <!-- Header -->
+    <div
+      class="max-w-7xl mx-auto px-4 py-4 sm:py-6 lg:py-8 space-y-4 sm:space-y-6 lg:space-y-8"
+    >
       <header class="text-center space-y-1 sm:space-y-2 fade-in">
         <h1
           class="text-3xl sm:text-4xl lg:text-5xl font-bold bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent"
@@ -139,7 +146,6 @@ const handleLogout = () => {
         </p>
       </header>
 
-      <!-- Message de succès -->
       <Transition name="slide-fade">
         <div
           v-if="showSuccess"
@@ -149,7 +155,6 @@ const handleLogout = () => {
         </div>
       </Transition>
 
-      <!-- Message d'erreur -->
       <div
         v-if="error"
         class="bg-red-500 text-white p-3 sm:p-4 rounded-lg shadow-lg text-center text-sm sm:text-base"
@@ -157,7 +162,6 @@ const handleLogout = () => {
         ⚠️ {{ error }}
       </div>
 
-      <!-- Vue de la semaine -->
       <section class="fade-in" style="animation-delay: 0.1s">
         <WeekView
           :weekDays="weekDays"
@@ -166,16 +170,16 @@ const handleLogout = () => {
         />
       </section>
 
-      <!-- Sélecteur d'humeur -->
       <section class="fade-in" style="animation-delay: 0.2s">
-        <div class="bg-white dark:bg-gray-800 p-4 sm:p-6 lg:p-8 rounded-2xl shadow-xl">
+        <div
+          class="bg-white dark:bg-gray-800 p-4 sm:p-6 lg:p-8 rounded-2xl shadow-xl"
+        >
           <MoodSelector
             :selectedMood="selectedMood"
             :disabled="loading"
             @select="handleMoodSelect"
           />
 
-          <!-- Zone de note -->
           <Transition name="expand">
             <div v-if="showNote" class="mt-4 sm:mt-6 space-y-3 sm:space-y-4">
               <div>
@@ -214,7 +218,6 @@ const handleLogout = () => {
         </div>
       </section>
 
-      <!-- Statistiques et graphiques -->
       <section
         v-if="stats.totalEntries > 0"
         class="fade-in"
@@ -228,20 +231,22 @@ const handleLogout = () => {
         <MoodChart :stats="stats" />
       </section>
 
-      <!-- Message si pas de données -->
       <section
         v-else
         class="text-center p-6 sm:p-8 lg:p-12 bg-white dark:bg-gray-800 rounded-2xl shadow-lg fade-in"
         style="animation-delay: 0.3s"
       >
         <div class="text-4xl sm:text-5xl lg:text-6xl mb-3 sm:mb-4">📝</div>
-        <p class="text-base sm:text-lg lg:text-xl text-gray-600 dark:text-gray-400">
+        <p
+          class="text-base sm:text-lg lg:text-xl text-gray-600 dark:text-gray-400"
+        >
           Commence à enregistrer tes humeurs pour voir tes statistiques !
         </p>
       </section>
 
-      <!-- Footer -->
-      <footer class="text-center py-4 sm:py-6 lg:py-8 text-gray-600 dark:text-gray-400">
+      <footer
+        class="text-center py-4 sm:py-6 lg:py-8 text-gray-600 dark:text-gray-400"
+      >
         <p class="text-xs sm:text-sm">
           MoodFlow+ - Créé avec ❤️ pour le Hackathon Ynov 2025
         </p>

@@ -1,7 +1,7 @@
 <script setup lang="ts">
-import { useTheme } from '@/composables/useTheme'
+import { useTheme } from "@/composables/useTheme";
 
-const { isDark, toggleTheme } = useTheme()
+const { isDark, toggleTheme } = useTheme();
 </script>
 
 <template>
@@ -11,7 +11,9 @@ const { isDark, toggleTheme } = useTheme()
     :class="[
       'p-3 rounded-full transition-all duration-300',
       'bg-gray-200 dark:bg-gray-700 hover:bg-gray-300 dark:hover:bg-gray-600',
-      'shadow-lg hover:shadow-xl transform hover:scale-110'
+      // J'ai retiré le 'shadow-lg hover:shadow-xl transform hover:scale-110' car il rend le bouton trop gros par rapport à Déconnexion
+      // Je l'ai remplacé par un style de bouton plus simple, mais vous pouvez le remettre si vous voulez.
+      'shadow-md hover:shadow-lg',
     ]"
     :aria-label="isDark ? 'Passer au mode clair' : 'Passer au mode sombre'"
   >
@@ -49,10 +51,13 @@ const { isDark, toggleTheme } = useTheme()
 </template>
 
 <style scoped>
+/* ⚠️ ATTENTION : J'AI RETIRÉ LA STYLE SUIVANT :
 .theme-toggle {
   position: fixed;
   top: 1rem;
   right: 1rem;
   z-index: 50;
 }
+*/
+/* Vous pouvez conserver la classe 'theme-toggle' vide si vous le souhaitez, mais assurez-vous de supprimer 'position: fixed;' */
 </style>

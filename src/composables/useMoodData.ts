@@ -4,11 +4,13 @@ import { ref, computed } from 'vue'
 import type { MoodEntry, MoodStats, MoodType } from '@/types/mood'
 import { apiService } from '@/services/api'
 
+const moodEntries = ref<MoodEntry[]>([])
+const currentMood = ref<MoodEntry | null>(null)
+const loading = ref(false)
+const error = ref<string | null>(null)
+const currentDate = ref(new Date());
+
 export function useMoodData() {
-  const moodEntries = ref<MoodEntry[]>([])
-  const currentMood = ref<MoodEntry | null>(null)
-  const loading = ref(false)
-  const error = ref<string | null>(null)
 
   // Récupérer les humeurs pour une période donnée
   const fetchMoodEntries = async (startDate?: string, endDate?: string) => {
@@ -85,17 +87,27 @@ export function useMoodData() {
     }
   }
 
-  // Obtenir les humeurs de la semaine courante
+  const toISODateString = (date: Date) => {
+    const year = date.getFullYear();
+    const month = (date.getMonth() + 1).toString().padStart(2, '0');
+    const day = date.getDate().toString().padStart(2, '0');
+    return `${year}-${month}-${day}`;
+  }
+
+  // Obtenir les humeurs de la semaine pour la date courante
   const getWeekMoods = () => {
-    const today = new Date()
-    const weekStart = new Date(today)
-    weekStart.setDate(today.getDate() - today.getDay() + 1) // Lundi
+    const weekStart = new Date(currentDate.value)
+    // Adjust to Monday as the start of the week
+    const day = weekStart.getDay()
+    const diff = weekStart.getDate() - day + (day === 0 ? -6 : 1); // adjust when day is sunday
+    weekStart.setDate(diff);
+    weekStart.setHours(0, 0, 0, 0);
 
     const weekDays = []
     for (let i = 0; i < 7; i++) {
       const date = new Date(weekStart)
       date.setDate(weekStart.getDate() + i)
-      const dateStr = date.toISOString().split('T')[0]
+      const dateStr = toISODateString(date)
 
       const mood = moodEntries.value.find(entry => entry.date === dateStr)
       weekDays.push({
@@ -176,6 +188,20 @@ export function useMoodData() {
     }
   })
 
+  const nextWeek = () => {
+    currentDate.value.setDate(currentDate.value.getDate() + 7);
+    currentDate.value = new Date(currentDate.value);
+  };
+
+  const previousWeek = () => {
+    currentDate.value.setDate(currentDate.value.getDate() - 7);
+    currentDate.value = new Date(currentDate.value);
+  };
+
+  const setWeek = (date: Date) => {
+    currentDate.value = new Date(date);
+  };
+
   return {
     moodEntries,
     currentMood,
@@ -187,5 +213,9 @@ export function useMoodData() {
     deleteMood,
     getWeekMoods,
     stats,
+    currentDate,
+    nextWeek,
+    previousWeek,
+    setWeek,
   }
 }

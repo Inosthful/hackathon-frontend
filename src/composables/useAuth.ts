@@ -1,34 +1,14 @@
-// Composable pour gérer l'authentification
-
 import { ref, computed } from 'vue'
 import axios from 'axios'
 import type { User, LoginCredentials, RegisterData, AuthResponse } from '@/types/auth'
-
-// 🔧 MODE DEV : Mettre à true pour utiliser un utilisateur fictif
-const DEV_MODE = true
 
 const user = ref<User | null>(null)
 const token = ref<string | null>(null)
 const loading = ref(false)
 const error = ref<string | null>(null)
 
-// Utilisateur fictif pour le mode développement
-const mockUser: User = {
-  id: 999,
-  email: 'dev@moodflow.com',
-  username: 'Dev Tester',
-  createdAt: new Date().toISOString(),
-}
-
 // Charger le token et l'utilisateur depuis localStorage au démarrage
 const loadStoredAuth = () => {
-  // En mode DEV, charger l'utilisateur fictif
-  if (DEV_MODE) {
-    token.value = 'dev-token-123'
-    user.value = mockUser
-    return
-  }
-
   const storedToken = localStorage.getItem('moodflow_token')
   const storedUser = localStorage.getItem('moodflow_user')
 

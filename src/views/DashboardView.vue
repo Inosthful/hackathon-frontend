@@ -8,6 +8,7 @@ import MoodChart from "../components/MoodChart.vue";
 import MoodSelector from "../components/MoodSelector.vue";
 import MoodPopup from "../components/MoodPopup.vue";
 import ThemeToggle from "../components/ThemeToggle.vue"; // 👈 AJOUTÉ
+
 import WeekView from "../components/WeekView.vue";
 import MonthView from "../components/MonthView.vue";
 
@@ -40,10 +41,8 @@ const currentDayMood = computed(() => {
   return weekDays.value.find((day) => day.date === selectedDate.value)?.mood;
 });
 
-// Charger les données au montage
 onMounted(async () => {
   await fetchMoodEntries();
-  // Pré-sélectionner l'humeur si elle existe déjà pour aujourd'hui
   if (currentDayMood.value) {
     selectedMood.value = currentDayMood.value.mood;
     moodNote.value = currentDayMood.value.note || "";
@@ -84,13 +83,11 @@ const saveMoodEntry = async () => {
       note: moodNote.value || undefined,
     });
 
-    // Afficher un message de succès
     showSuccess.value = true;
     setTimeout(() => {
       showSuccess.value = false;
     }, 3000);
 
-    // Recharger les données
     await fetchMoodEntries();
   } catch (e) {
     console.error("Erreur lors de l'enregistrement:", e);

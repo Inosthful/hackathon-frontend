@@ -3,7 +3,7 @@ import type { RouteRecordRaw } from 'vue-router'
 import { useAuth } from '@/composables/useAuth'
 
 // 🔧 MODE DEV : Mettre à true pour accéder au dashboard sans authentification
-const DEV_MODE = true
+const DEV_MODE = false
 
 const routes: RouteRecordRaw[] = [
   {

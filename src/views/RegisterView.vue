@@ -7,12 +7,29 @@ import type { RegisterData } from '@/types/auth'
 const router = useRouter()
 const { register, loading, error } = useAuth()
 
+const step = ref(1)
+
 const formData = ref<RegisterData>({
-  username: '',
+  lastName: '',
+  firstName: '',
   email: '',
+  birthDate: '',
   password: '',
   passwordConfirm: '',
 })
+
+const nextStep = () => {
+  // Basic validation for step 1
+  if (formData.value.firstName && formData.value.lastName && formData.value.email && formData.value.birthDate) {
+    step.value = 2
+  } else {
+    error.value = 'Veuillez remplir tous les champs.'
+  }
+}
+
+const prevStep = () => {
+  step.value = 1
+}
 
 const handleRegister = async () => {
   const success = await register(formData.value)
@@ -49,96 +66,146 @@ const handleRegister = async () => {
         </Transition>
 
         <!-- Formulaire -->
-        <form @submit.prevent="handleRegister" class="space-y-4">
-          <!-- Username -->
-          <div>
-            <label for="username" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-              Nom d'utilisateur
-            </label>
-            <input
-              id="username"
-              v-model="formData.username"
-              type="text"
-              required
-              minlength="3"
-              placeholder="john_doe"
-              class="w-full px-4 py-3 border-2 border-gray-300 dark:border-gray-600 rounded-lg
-                     bg-white dark:bg-gray-700 text-gray-800 dark:text-gray-200
-                     focus:ring-2 focus:ring-purple-500 focus:border-transparent
-                     transition-all duration-200"
-            />
+        <form @submit.prevent="step === 1 ? nextStep() : handleRegister()" class="space-y-4">
+          <!-- Step 1: User Info -->
+          <div v-if="step === 1">
+            <!-- Nom -->
+            <div>
+              <label for="lastName" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                Nom
+              </label>
+              <input
+                id="lastName"
+                v-model="formData.lastName"
+                type="text"
+                required
+                placeholder="Doe"
+                class="w-full px-4 py-3 border-2 border-gray-300 dark:border-gray-600 rounded-lg
+                       bg-white dark:bg-gray-700 text-gray-800 dark:text-gray-200
+                       focus:ring-2 focus:ring-purple-500 focus:border-transparent
+                       transition-all duration-200"
+              />
+            </div>
+
+            <!-- Prénom -->
+            <div>
+              <label for="firstName" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                Prénom
+              </label>
+              <input
+                id="firstName"
+                v-model="formData.firstName"
+                type="text"
+                required
+                placeholder="John"
+                class="w-full px-4 py-3 border-2 border-gray-300 dark:border-gray-600 rounded-lg
+                       bg-white dark:bg-gray-700 text-gray-800 dark:text-gray-200
+                       focus:ring-2 focus:ring-purple-500 focus:border-transparent
+                       transition-all duration-200"
+              />
+            </div>
+
+            <!-- Email -->
+            <div>
+              <label for="email" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                Email
+              </label>
+              <input
+                id="email"
+                v-model="formData.email"
+                type="email"
+                required
+                placeholder="ton.email@exemple.com"
+                class="w-full px-4 py-3 border-2 border-gray-300 dark:border-gray-600 rounded-lg
+                       bg-white dark:bg-gray-700 text-gray-800 dark:text-gray-200
+                       focus:ring-2 focus:ring-purple-500 focus:border-transparent
+                       transition-all duration-200"
+              />
+            </div>
+
+            <!-- Date anniversaire -->
+            <div>
+              <label for="birthDate" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                Date anniversaire
+              </label>
+              <input
+                id="birthDate"
+                v-model="formData.birthDate"
+                type="date"
+                required
+                class="w-full px-4 py-3 border-2 border-gray-300 dark:border-gray-600 rounded-lg
+                       bg-white dark:bg-gray-700 text-gray-800 dark:text-gray-200
+                       focus:ring-2 focus:ring-purple-500 focus:border-transparent
+                       transition-all duration-200"
+              />
+            </div>
           </div>
 
-          <!-- Email -->
-          <div>
-            <label for="email" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-              Email
-            </label>
-            <input
-              id="email"
-              v-model="formData.email"
-              type="email"
-              required
-              placeholder="ton.email@exemple.com"
-              class="w-full px-4 py-3 border-2 border-gray-300 dark:border-gray-600 rounded-lg
-                     bg-white dark:bg-gray-700 text-gray-800 dark:text-gray-200
-                     focus:ring-2 focus:ring-purple-500 focus:border-transparent
-                     transition-all duration-200"
-            />
+          <!-- Step 2: Password -->
+          <div v-if="step === 2" class="space-y-4">
+            <!-- Password -->
+            <div>
+              <label for="password" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                Mot de passe
+              </label>
+              <input
+                id="password"
+                v-model="formData.password"
+                type="password"
+                required
+                minlength="6"
+                placeholder="••••••••"
+                class="w-full px-4 py-3 border-2 border-gray-300 dark:border-gray-600 rounded-lg
+                       bg-white dark:bg-gray-700 text-gray-800 dark:text-gray-200
+                       focus:ring-2 focus:ring-purple-500 focus:border-transparent
+                       transition-all duration-200"
+              />
+              <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">
+                Au moins 6 caractères
+              </p>
+            </div>
+
+            <!-- Password Confirm -->
+            <div>
+              <label for="passwordConfirm" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                Confirmer le mot de passe
+              </label>
+              <input
+                id="passwordConfirm"
+                v-model="formData.passwordConfirm"
+                type="password"
+                required
+                minlength="6"
+                placeholder="••••••••"
+                class="w-full px-4 py-3 border-2 border-gray-300 dark:border-gray-600 rounded-lg
+                       bg-white dark:bg-gray-700 text-gray-800 dark:text-gray-200
+                       focus:ring-2 focus:ring-purple-500 focus:border-transparent
+                       transition-all duration-200"
+              />
+            </div>
           </div>
 
-          <!-- Password -->
-          <div>
-            <label for="password" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-              Mot de passe
-            </label>
-            <input
-              id="password"
-              v-model="formData.password"
-              type="password"
-              required
-              minlength="6"
-              placeholder="••••••••"
-              class="w-full px-4 py-3 border-2 border-gray-300 dark:border-gray-600 rounded-lg
-                     bg-white dark:bg-gray-700 text-gray-800 dark:text-gray-200
-                     focus:ring-2 focus:ring-purple-500 focus:border-transparent
-                     transition-all duration-200"
-            />
-            <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">
-              Au moins 6 caractères
-            </p>
+          <!-- Boutons de navigation -->
+          <div class="flex" :class="[step === 1 ? 'justify-end' : 'justify-between']">
+            <button
+              v-if="step === 2"
+              @click="prevStep"
+              type="button"
+              class="py-3 px-6 rounded-lg bg-gray-200 dark:bg-gray-600 text-gray-800 dark:text-gray-200 font-semibold hover:bg-gray-300 dark:hover:bg-gray-500 transition-all duration-200"
+            >
+              Précédent
+            </button>
+            <button
+              type="submit"
+              :disabled="loading"
+              class="py-3 px-6 rounded-lg bg-gradient-to-r from-purple-600 to-pink-600
+                     text-white font-semibold shadow-lg hover:shadow-xl
+                     transform hover:scale-105 transition-all duration-200
+                     disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none"
+            >
+              {{ step === 1 ? 'Suivant' : (loading ? 'Inscription...' : 'S\'inscrire') }}
+            </button>
           </div>
-
-          <!-- Password Confirm -->
-          <div>
-            <label for="passwordConfirm" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-              Confirmer le mot de passe
-            </label>
-            <input
-              id="passwordConfirm"
-              v-model="formData.passwordConfirm"
-              type="password"
-              required
-              minlength="6"
-              placeholder="••••••••"
-              class="w-full px-4 py-3 border-2 border-gray-300 dark:border-gray-600 rounded-lg
-                     bg-white dark:bg-gray-700 text-gray-800 dark:text-gray-200
-                     focus:ring-2 focus:ring-purple-500 focus:border-transparent
-                     transition-all duration-200"
-            />
-          </div>
-
-          <!-- Bouton inscription -->
-          <button
-            type="submit"
-            :disabled="loading"
-            class="w-full py-3 px-6 rounded-lg bg-gradient-to-r from-purple-600 to-pink-600
-                   text-white font-semibold shadow-lg hover:shadow-xl
-                   transform hover:scale-105 transition-all duration-200
-                   disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none"
-          >
-            {{ loading ? 'Inscription...' : 'S\'inscrire' }}
-          </button>
         </form>
 
         <!-- Lien connexion -->

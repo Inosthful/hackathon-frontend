@@ -74,8 +74,10 @@ export function useAuth() {
 
     try {
       const response = await axios.post<AuthResponse>(`${API_URL}/auth/register`, {
-        username: data.username,
+        lastName: data.lastName,
+        firstName: data.firstName,
         email: data.email,
+        birthDate: data.birthDate,
         password: data.password,
       })
 

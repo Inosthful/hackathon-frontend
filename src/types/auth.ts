@@ -13,8 +13,10 @@ export interface LoginCredentials {
 }
 
 export interface RegisterData {
-  username: string
+  lastName: string
+  firstName: string
   email: string
+  birthDate: string
   password: string
   passwordConfirm: string
 }

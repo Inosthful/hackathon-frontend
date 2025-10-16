@@ -1,19 +1,11 @@
 <script setup lang="ts">
-import { useRoute } from 'vue-router'
 import ThemeToggle from './components/ThemeToggle.vue'
-
-const route = useRoute()
-
-// Afficher le ThemeToggle uniquement sur le dashboard
-const showThemeToggle = () => {
-  return route.name === 'Dashboard'
-}
 </script>
 
 <template>
   <div class="app min-h-screen">
-    <!-- Toggle thème (uniquement sur le dashboard) -->
-    <ThemeToggle v-if="showThemeToggle()" />
+    <!-- Toggle thème -->
+    <ThemeToggle />
 
     <!-- Router View -->
     <router-view v-slot="{ Component }">

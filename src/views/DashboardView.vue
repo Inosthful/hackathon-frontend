@@ -10,9 +10,6 @@ import ThemeToggle from "../components/ThemeToggle.vue"; // 👈 AJOUTÉ
 import WeekView from "../components/WeekView.vue";
 
 import WeekSelector from "../components/WeekSelector.vue";
-import MoodChart from "../components/MoodChart.vue";
-import type { MoodType } from "@/types/mood";
-
 const router = useRouter();
 const { user, logout } = useAuth();
 
@@ -21,10 +18,10 @@ const { loading, error, fetchMoodEntries, saveMood, getWeekMoods, stats } =
 
 const toISODateString = (date: Date) => {
   const year = date.getFullYear();
-  const month = (date.getMonth() + 1).toString().padStart(2, '0');
-  const day = date.getDate().toString().padStart(2, '0');
+  const month = (date.getMonth() + 1).toString().padStart(2, "0");
+  const day = date.getDate().toString().padStart(2, "0");
   return `${year}-${month}-${day}`;
-}
+};
 
 const selectedDate = ref<string>(toISODateString(new Date()));
 const selectedMood = ref<MoodType | undefined>();
@@ -173,7 +170,6 @@ const handleLogout = () => {
         ⚠️ {{ error }}
       </div>
 
-
       <!-- Sélecteur de semaine -->
       <section class="fade-in relative z-10" style="animation-delay: 0.1s">
         <WeekSelector />
@@ -188,10 +184,11 @@ const handleLogout = () => {
         />
       </section>
 
-
       <!-- Sélecteur d'humeur -->
       <section class="fade-in" style="animation-delay: 0.3s">
-        <div class="bg-white dark:bg-gray-800 p-4 sm:p-6 lg:p-8 rounded-2xl shadow-xl">
+        <div
+          class="bg-white dark:bg-gray-800 p-4 sm:p-6 lg:p-8 rounded-2xl shadow-xl"
+        >
           <MoodSelector
             :selectedMood="selectedMood"
             :disabled="loading"

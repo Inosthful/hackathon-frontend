@@ -120,6 +120,39 @@ export function useMoodData() {
     return weekDays
   }
 
+  // Obtenir les humeurs du mois complet pour la date courante
+  const getMonthMoods = () => {
+    const month = new Date(currentDate.value)
+    month.setDate(1)
+    const monthIndex = month.getMonth()
+    const year = month.getFullYear()
+
+    const firstDayOfMonth = new Date(year, monthIndex, 1).getDay()
+    const daysInMonth = new Date(year, monthIndex + 1, 0).getDate()
+
+    const monthDays = []
+
+    // Ajouter des jours vides pour aligner le premier jour
+    for (let i = 0; i < (firstDayOfMonth === 0 ? 6 : firstDayOfMonth - 1); i++) {
+      monthDays.push(null)
+    }
+
+    // Ajouter tous les jours du mois
+    for (let i = 1; i <= daysInMonth; i++) {
+      const date = new Date(year, monthIndex, i)
+      const dateStr = toISODateString(date)
+      const mood = moodEntries.value.find(entry => entry.date === dateStr)
+
+      monthDays.push({
+        date: dateStr,
+        dayName: date.toLocaleDateString('fr-FR', { weekday: 'short' }),
+        mood: mood || null,
+      })
+    }
+
+    return monthDays
+  }
+
   // Calculer les statistiques
   const stats = computed((): MoodStats => {
     if (moodEntries.value.length === 0) {
@@ -202,6 +235,12 @@ export function useMoodData() {
     currentDate.value = new Date(date);
   };
 
+  // Vérifier si une humeur existe pour aujourd'hui
+  const hasTodayMood = () => {
+    const today = toISODateString(new Date())
+    return moodEntries.value.some(entry => entry.date === today)
+  }
+
   return {
     moodEntries,
     currentMood,
@@ -212,10 +251,12 @@ export function useMoodData() {
     saveMood,
     deleteMood,
     getWeekMoods,
+    getMonthMoods,
     stats,
     currentDate,
     nextWeek,
     previousWeek,
     setWeek,
+    hasTodayMood,
   }
 }

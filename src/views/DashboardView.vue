@@ -6,14 +6,16 @@ import { computed, onMounted, ref } from "vue";
 import { useRouter } from "vue-router";
 import MoodChart from "../components/MoodChart.vue";
 import MoodSelector from "../components/MoodSelector.vue";
+import MoodPopup from "../components/MoodPopup.vue";
 import ThemeToggle from "../components/ThemeToggle.vue"; // 👈 AJOUTÉ
 import WeekView from "../components/WeekView.vue";
+import MonthView from "../components/MonthView.vue";
 
 import WeekSelector from "../components/WeekSelector.vue";
 const router = useRouter();
 const { user, logout } = useAuth();
 
-const { loading, error, fetchMoodEntries, saveMood, getWeekMoods, stats } =
+const { loading, error, fetchMoodEntries, saveMood, getWeekMoods, getMonthMoods, stats, hasTodayMood } =
   useMoodData();
 
 const toISODateString = (date: Date) => {
@@ -28,8 +30,11 @@ const selectedMood = ref<MoodType | undefined>();
 const showNote = ref(false);
 const moodNote = ref("");
 const showSuccess = ref(false);
+const showMoodPopup = ref(false);
+const viewMode = ref<'week' | 'month'>('week'); // Vue par défaut : semaine
 
 const weekDays = computed(() => getWeekMoods());
+const monthDays = computed(() => getMonthMoods());
 
 const currentDayMood = computed(() => {
   return weekDays.value.find((day) => day.date === selectedDate.value)?.mood;
@@ -42,6 +47,11 @@ onMounted(async () => {
   if (currentDayMood.value) {
     selectedMood.value = currentDayMood.value.mood;
     moodNote.value = currentDayMood.value.note || "";
+  }
+
+  // Afficher la popup si aucune humeur n'a été enregistrée aujourd'hui
+  if (!hasTodayMood()) {
+    showMoodPopup.value = true;
   }
 });
 
@@ -97,12 +107,53 @@ const handleLogout = () => {
   logout();
   router.push("/login");
 };
+
+const handlePopupClose = () => {
+  showMoodPopup.value = false;
+};
+
+const handlePopupSave = async (data: { mood: MoodType; note?: string }) => {
+  try {
+    await saveMood({
+      date: toISODateString(new Date()),
+      mood: data.mood,
+      note: data.note,
+    });
+
+    // Fermer la popup
+    showMoodPopup.value = false;
+
+    // Afficher un message de succès
+    showSuccess.value = true;
+    setTimeout(() => {
+      showSuccess.value = false;
+    }, 3000);
+
+    // Recharger les données
+    await fetchMoodEntries();
+
+    // Mettre à jour la sélection pour aujourd'hui
+    selectedDate.value = toISODateString(new Date());
+    selectedMood.value = data.mood;
+    moodNote.value = data.note || "";
+  } catch (e) {
+    console.error("Erreur lors de l'enregistrement depuis la popup:", e);
+  }
+};
 </script>
 
 <template>
   <div
     class="dashboard min-h-screen bg-gradient-to-br from-purple-50 to-pink-50 dark:from-gray-900 dark:to-gray-800 transition-colors duration-300"
   >
+    <!-- Popup d'humeur quotidienne -->
+    <MoodPopup
+      :show="showMoodPopup"
+      :loading="loading"
+      @close="handlePopupClose"
+      @save="handlePopupSave"
+    />
+
     <div
       class="bg-white dark:bg-gray-800 shadow-md border-b border-gray-200 dark:border-gray-700"
     >
@@ -175,10 +226,47 @@ const handleLogout = () => {
         <WeekSelector />
       </section>
 
+      <!-- Toggle Vue Semaine / Mois -->
+      <section class="fade-in flex justify-center" style="animation-delay: 0.15s">
+        <div class="inline-flex rounded-lg border-2 border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 p-1 shadow-md">
+          <button
+            @click="viewMode = 'week'"
+            :class="[
+              'px-4 sm:px-6 py-2 rounded-lg text-sm sm:text-base font-medium transition-all duration-200',
+              viewMode === 'week'
+                ? 'bg-gradient-to-r from-purple-600 to-pink-600 text-white shadow-lg'
+                : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700'
+            ]"
+          >
+            📅 Semaine
+          </button>
+          <button
+            @click="viewMode = 'month'"
+            :class="[
+              'px-4 sm:px-6 py-2 rounded-lg text-sm sm:text-base font-medium transition-all duration-200',
+              viewMode === 'month'
+                ? 'bg-gradient-to-r from-purple-600 to-pink-600 text-white shadow-lg'
+                : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700'
+            ]"
+          >
+            🗓️ Mois
+          </button>
+        </div>
+      </section>
+
       <!-- Vue de la semaine -->
-      <section class="fade-in" style="animation-delay: 0.2s">
+      <section v-if="viewMode === 'week'" class="fade-in" style="animation-delay: 0.2s">
         <WeekView
           :weekDays="weekDays"
+          :selectedDate="selectedDate"
+          @selectDate="handleDateSelect"
+        />
+      </section>
+
+      <!-- Vue du mois -->
+      <section v-if="viewMode === 'month'" class="fade-in" style="animation-delay: 0.2s">
+        <MonthView
+          :monthDays="monthDays"
           :selectedDate="selectedDate"
           @selectDate="handleDateSelect"
         />

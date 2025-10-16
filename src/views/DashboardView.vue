@@ -1,23 +1,27 @@
 <script setup lang="ts">
-import { useAuth } from "@/composables/useAuth";
 import { useMoodData } from "@/composables/useMoodData";
 import type { MoodType } from "@/types/mood";
 import { computed, onMounted, ref } from "vue";
-import { useRouter } from "vue-router";
+import { useRouter, useRoute } from "vue-router"; // Added
+import { useAuth } from "@/composables/useAuth"; // Added
 import MoodChart from "../components/MoodChart.vue";
 import MoodSelector from "../components/MoodSelector.vue";
 import MoodPopup from "../components/MoodPopup.vue";
-import ThemeToggle from "../components/ThemeToggle.vue"; // 👈 AJOUTÉ
 
 import WeekView from "../components/WeekView.vue";
 import MonthView from "../components/MonthView.vue";
 
 import WeekSelector from "../components/WeekSelector.vue";
-const router = useRouter();
-const { user, logout } = useAuth();
+
+const router = useRouter(); // Added
+const route = useRoute(); // Added
 
 const { loading, error, fetchMoodEntries, saveMood, getWeekMoods, getMonthMoods, stats, hasTodayMood } =
   useMoodData();
+
+const { fetchUser } = useAuth(); // Added
+
+const emailChangedSuccessMessage = ref(''); // Added
 
 const toISODateString = (date: Date) => {
   const year = date.getFullYear();
@@ -51,6 +55,19 @@ onMounted(async () => {
   // Afficher la popup si aucune humeur n'a été enregistrée aujourd'hui
   if (!hasTodayMood()) {
     showMoodPopup.value = true;
+  }
+
+  // Check for email changed success message
+  if (route.query.email_changed === 'true') {
+    // Fetch updated user data to refresh the auth state
+    await fetchUser(); // Added this line
+
+    emailChangedSuccessMessage.value = 'Votre adresse e-mail a été mise à jour avec succès !';
+    // Clear the query parameter to prevent message from reappearing on refresh
+    router.replace({ query: { ...route.query, email_changed: undefined } });
+    setTimeout(() => {
+      emailChangedSuccessMessage.value = '';
+    }, 5000); // Message disappears after 5 seconds
   }
 });
 
@@ -100,11 +117,6 @@ const cancelEdit = () => {
   moodNote.value = currentDayMood.value?.note || "";
 };
 
-const handleLogout = () => {
-  logout();
-  router.push("/login");
-};
-
 const handlePopupClose = () => {
   showMoodPopup.value = false;
 };
@@ -152,50 +164,6 @@ const handlePopupSave = async (data: { mood: MoodType; note?: string }) => {
     />
 
     <div
-      class="bg-white dark:bg-gray-800 shadow-md border-b border-gray-200 dark:border-gray-700"
-    >
-      <div
-        class="max-w-7xl mx-auto px-4 py-3 sm:py-4 flex flex-col sm:flex-row gap-3 sm:gap-0 justify-between items-center"
-      >
-        <div class="flex items-center gap-2 sm:gap-3">
-          <div
-            class="w-8 h-8 sm:w-10 sm:h-10 rounded-full bg-gradient-to-r from-purple-600 to-pink-600 flex items-center justify-center text-white font-bold text-sm sm:text-base"
-          >
-            {{ user?.username?.charAt(0).toUpperCase() || "U" }}
-          </div>
-          <div>
-            <p
-              class="text-sm sm:text-base font-semibold text-gray-800 dark:text-gray-200"
-            >
-              {{ user?.username }}
-            </p>
-            <p class="text-xs text-gray-500 dark:text-gray-400">
-              {{ user?.email }}
-            </p>
-          </div>
-        </div>
-
-        <div class="flex items-center gap-4">
-          <router-link to="/profile">
-            <button
-              class="px-4 py-2 text-xs sm:text-sm rounded-lg bg-purple-600 text-white font-medium hover:bg-purple-700 transition-all duration-200"
-            >
-              Profil
-            </button>
-          </router-link>
-          <button
-            @click="handleLogout"
-            class="px-4 py-2 text-xs sm:text-sm rounded-lg bg-pink-600 text-white font-medium hover:bg-pink-700 transition-all duration-200"
-          >
-            Déconnexion
-          </button>
-
-          <ThemeToggle />
-        </div>
-      </div>
-    </div>
-
-    <div
       class="max-w-7xl mx-auto px-4 py-4 sm:py-6 lg:py-8 space-y-4 sm:space-y-6 lg:space-y-8"
     >
       <header class="text-center space-y-1 sm:space-y-2 fade-in">
@@ -215,6 +183,16 @@ const handlePopupSave = async (data: { mood: MoodType; note?: string }) => {
           class="bg-green-500 text-white p-3 sm:p-4 rounded-lg shadow-lg text-center font-medium text-sm sm:text-base"
         >
           ✅ Humeur enregistrée avec succès !
+        </div>
+      </Transition>
+
+      <!-- Message de succès (changement d'email) -->
+      <Transition name="slide-fade">
+        <div
+          v-if="emailChangedSuccessMessage"
+          class="bg-green-500 text-white p-3 sm:p-4 rounded-lg shadow-lg text-center font-medium text-sm sm:text-base"
+        >
+          ✅ {{ emailChangedSuccessMessage }}
         </div>
       </Transition>
 

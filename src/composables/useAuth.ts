@@ -128,7 +128,8 @@ export function useAuth() {
       user.value = response.data.user;
       localStorage.setItem('moodflow_user', JSON.stringify(user.value));
     } catch (e) {
-      console.error('Failed to fetch user', e);
+      console.error('[useAuth] fetchUser: Failed to fetch user', e);
+      logout();
     }
   };
 
@@ -149,6 +150,18 @@ export function useAuth() {
     return apiClient.post('/user/request-email-change', { email });
   };
 
+  const changePassword = async (passwordData: { currentPassword, newPassword }) => {
+    console.log('[useAuth] Requesting password change.');
+    return apiClient.post('/user/change-password', passwordData);
+  };
+
+  const deleteAccount = async (password: string) => {
+    console.log('[useAuth] Requesting account deletion.');
+    await apiClient.delete('/user', { data: { password } });
+    logout(); // Clear local state and storage after successful deletion
+    console.log('[useAuth] Account deleted and logged out.');
+  };
+
   return {
     user,
     token,
@@ -161,5 +174,7 @@ export function useAuth() {
     fetchUser,
     updateUser,
     requestEmailChange,
+    changePassword,
+    deleteAccount,
   }
 }

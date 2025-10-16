@@ -1,31 +1,28 @@
 <script setup lang="ts">
 import { computed } from "vue";
 import { useRoute } from "vue-router";
-import ThemeToggle from "./components/ThemeToggle.vue"; // Assurez-vous que le chemin est correct
+import Navbar from "./components/Navbar.vue";
+import ThemeToggle from "./components/ThemeToggle.vue";
 
 const route = useRoute();
 
-// Détermine si le ThemeToggle doit être affiché (Login ou Register)
-const shouldShowThemeToggle = computed(() => {
-  const currentRouteName = route.name;
+// Affiche la Navbar pour les routes authentifiées
+const shouldShowNavbar = computed(() => !!route.meta.requiresAuth);
 
-  // Le ThemeToggle est rendu dans DashboardView pour 'Dashboard',
-  // donc ici on le rend seulement pour 'Login' et 'Register' (les routes où il est absent).
-  return currentRouteName === "Login" || currentRouteName === "Register";
-});
+// Affiche le ThemeToggle pour les routes non authentifiées (Login, Register)
+const shouldShowThemeToggleForGuest = computed(() => !route.meta.requiresAuth);
 
-// Détermine si la position absolue/fixe doit être appliquée.
-// Si c'est Login ou Register, on veut une position absolue/fixe pour être en haut à droite.
-const isFixedOrAbsolutePosition = computed(() => {
-  return route.name === "Login" || route.name === "Register";
-});
 </script>
 
 <template>
-  <div class="app min-h-screen">
+  <div class="app min-h-screen bg-gray-50 dark:bg-gray-900">
+    <!-- Navbar pour les routes authentifiées -->
+    <Navbar v-if="shouldShowNavbar" />
+
+    <!-- ThemeToggle pour les pages "invité" -->
     <ThemeToggle
-      v-if="shouldShowThemeToggle"
-      :class="{ 'absolute-top-right': isFixedOrAbsolutePosition }"
+      v-if="shouldShowThemeToggleForGuest"
+      class="absolute top-4 right-4 z-50"
     />
 
     <router-view v-slot="{ Component }">
@@ -47,37 +44,10 @@ body {
   padding: 0;
 }
 
-/* 🎯 CLASSE AJOUTÉE POUR LA POSITION HAUT-DROITE SUR LOGIN/REGISTER */
-.absolute-top-right {
-  position: absolute; /* ou 'fixed' si vous voulez qu'il reste visible au scroll */
-  top: 1rem; /* 16px */
-  right: 1rem; /* 16px */
-  z-index: 50; /* S'assure qu'il est au-dessus du contenu */
-}
-
 /* Transition pour les changements de page */
 .fade-enter-active,
 .fade-leave-active {
-  transition: opacity 0.3s ease;
-}
-
-.fade-enter-from,
-.fade-leave-to {
-  opacity: 0;
-}
-html {
-  scroll-behavior: smooth;
-}
-
-body {
-  margin: 0;
-  padding: 0;
-}
-
-/* Transition pour les changements de page */
-.fade-enter-active,
-.fade-leave-active {
-  transition: opacity 0.3s ease;
+  transition: opacity 0.2s ease;
 }
 
 .fade-enter-from,

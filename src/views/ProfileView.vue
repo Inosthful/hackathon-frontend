@@ -3,7 +3,7 @@ import { ref, onMounted, computed } from 'vue';
 import { useAuth } from '@/composables/useAuth';
 import { useRouter } from 'vue-router';
 
-const { user, fetchUser, updateUser, requestEmailChange } = useAuth();
+const { user, fetchUser, updateUser, requestEmailChange, changePassword, deleteAccount } = useAuth();
 const router = useRouter();
 
 const formData = ref({
@@ -16,6 +16,18 @@ const newEmail = ref('');
 const emailChangeLoading = ref(false);
 const emailChangeSuccess = ref('');
 const emailChangeError = ref('');
+
+const currentPassword = ref('');
+const newPassword = ref('');
+const passwordChangeLoading = ref(false);
+const passwordChangeSuccess = ref('');
+const passwordChangeError = ref('');
+
+// Delete Account Modal State
+const showDeleteModal = ref(false);
+const deletePassword = ref('');
+const deleteLoading = ref(false);
+const deleteError = ref('');
 
 const loading = ref(false);
 const successMessage = ref('');
@@ -63,7 +75,7 @@ const handleSubmit = async () => {
 const handleEmailChange = async () => {
   if (!newEmail.value) {
     emailChangeError.value = 'Veuillez saisir une nouvelle adresse e-mail.';
-    setTimeout(() => emailChangeError.value = '', 4000);
+    setTimeout(() => emailChangeError.value = '', 5000);
     return;
   }
   emailChangeLoading.value = true;
@@ -75,17 +87,84 @@ const handleEmailChange = async () => {
     emailChangeSuccess.value = 'Un e-mail de confirmation a été envoyé à votre nouvelle adresse.';
     newEmail.value = '';
     setTimeout(() => emailChangeSuccess.value = '', 4000);
-  } catch (error) {
-    emailChangeError.value = 'Une erreur est survenue lors de la demande de changement d\'e-mail.';
-    console.error(error);
-    setTimeout(() => emailChangeError.value = '', 4000);
+  } catch (error: any) {
+    const backendMessage = error.response?.data?.message;
+    const errorMap: { [key: string]: string } = {
+      'This email address is already in use.': 'Cette adresse e-mail est déjà utilisée.',
+      'Invalid email provided': 'Veuillez fournir une adresse e-mail valide.',
+    };
+    emailChangeError.value = errorMap[backendMessage] || 'Une erreur est survenue. Veuillez réessayer.';
+    setTimeout(() => emailChangeError.value = '', 5000);
   } finally {
     emailChangeLoading.value = false;
   }
 };
 
-const goBack = () => {
-  router.push('/dashboard');
+const handlePasswordChange = async () => {
+  if (!currentPassword.value || !newPassword.value) {
+    passwordChangeError.value = 'Veuillez remplir tous les champs.';
+    setTimeout(() => passwordChangeError.value = '', 5000);
+    return;
+  }
+  passwordChangeLoading.value = true;
+  passwordChangeSuccess.value = '';
+  passwordChangeError.value = '';
+
+  try {
+    await changePassword({
+      currentPassword: currentPassword.value,
+      newPassword: newPassword.value,
+    });
+    passwordChangeSuccess.value = 'Votre mot de passe a été mis à jour avec succès !';
+    currentPassword.value = '';
+    newPassword.value = '';
+    setTimeout(() => passwordChangeSuccess.value = '', 4000);
+  } catch (error: any) {
+    const backendMessage = error.response?.data?.message;
+    const errorMap: { [key: string]: string } = {
+      'Invalid current password': 'Votre ancien mot de passe est incorrect.',
+      'Current and new passwords are required': 'Veuillez fournir votre ancien et votre nouveau mot de passe.',
+    };
+    passwordChangeError.value = errorMap[backendMessage] || 'Une erreur inattendue est survenue. Veuillez réessayer.';
+    setTimeout(() => passwordChangeError.value = '', 5000); // Délai légèrement plus long pour les erreurs
+  } finally {
+    passwordChangeLoading.value = false;
+  }
+};
+
+const openDeleteModal = () => {
+  showDeleteModal.value = true;
+  deleteError.value = '';
+  deletePassword.value = '';
+};
+
+const closeDeleteModal = () => {
+  showDeleteModal.value = false;
+};
+
+const handleAccountDelete = async () => {
+  if (!deletePassword.value) {
+    deleteError.value = 'Le mot de passe est requis pour confirmer.';
+    return;
+  }
+  deleteLoading.value = true;
+  deleteError.value = '';
+
+  try {
+    await deleteAccount(deletePassword.value);
+    // On success, the useAuth composable logs the user out.
+    // We just need to redirect.
+    router.push('/login');
+  } catch (error: any) {
+    const backendMessage = error.response?.data?.message;
+    if (backendMessage === 'Invalid password.') {
+      deleteError.value = 'Mot de passe incorrect.';
+    } else {
+      deleteError.value = 'Une erreur est survenue. Impossible de supprimer le compte.';
+    }
+  } finally {
+    deleteLoading.value = false;
+  }
 };
 </script>
 
@@ -156,9 +235,6 @@ const goBack = () => {
               </div>
 
               <div class="pt-6 flex flex-col-reverse sm:flex-row sm:justify-end sm:items-center gap-4">
-                <button type="button" @click="goBack" class="px-4 py-2 text-xs sm:text-sm rounded-lg bg-gray-300 text-gray-800 font-medium hover:bg-gray-400 transition-all duration-200">
-                  Retour
-                </button>
                 <button type="submit" :disabled="loading" class="px-4 py-2 text-xs sm:text-sm rounded-lg bg-purple-600 text-white font-medium hover:bg-purple-700 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed">
                   <span v-if="loading">Sauvegarde...</span>
                   <span v-else>Sauvegarder</span>
@@ -181,6 +257,41 @@ const goBack = () => {
                 </button>
               </div>
             </form>
+
+            <hr class="my-8 border-gray-200/50 dark:border-gray-700/50">
+
+            <h3 class="text-2xl font-bold text-gray-800 dark:text-white mb-6">Changer mon mot de passe</h3>
+            <form @submit.prevent="handlePasswordChange" class="space-y-6">
+              <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div class="form-group">
+                  <label for="current-password" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Ancien mot de passe</label>
+                  <input type="password" id="current-password" v-model="currentPassword" placeholder="••••••••" class="w-full p-3 border-2 border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-800 dark:text-gray-200 focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all duration-200" />
+                </div>
+                <div class="form-group">
+                  <label for="new-password" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Nouveau mot de passe</label>
+                  <input type="password" id="new-password" v-model="newPassword" placeholder="••••••••" class="w-full p-3 border-2 border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-800 dark:text-gray-200 focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all duration-200" />
+                </div>
+              </div>
+              <div class="pt-6 flex justify-end">
+                <button type="submit" :disabled="passwordChangeLoading" class="px-4 py-2 text-xs sm:text-sm rounded-lg bg-purple-600 text-white font-medium hover:bg-purple-700 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed">
+                  <span v-if="passwordChangeLoading">Changement...</span>
+                  <span v-else>Changer le mot de passe</span>
+                </button>
+              </div>
+            </form>
+
+            <hr class="my-8 border-gray-200/50 dark:border-gray-700/50">
+
+            <div class="p-6 bg-red-50 dark:bg-red-900/20 rounded-2xl">
+              <h3 class="text-xl font-bold text-red-800 dark:text-red-300">Zone de danger</h3>
+              <p class="text-red-700 dark:text-red-400 mt-2 text-sm">La suppression de votre compte est une action définitive et irréversible. Toutes vos données seront perdues.</p>
+              <div class="mt-4 flex justify-end">
+                <button @click="openDeleteModal" class="px-4 py-2 text-xs sm:text-sm rounded-lg bg-red-600 text-white font-medium hover:bg-red-700 transition-all duration-200">
+                  Supprimer mon compte
+                </button>
+              </div>
+            </div>
+
           </div>
         </div>
       </div>
@@ -205,10 +316,52 @@ const goBack = () => {
         </div>
       </transition>
 
+      <transition name="slide-up">
+        <div v-if="passwordChangeSuccess || passwordChangeError" class="fixed bottom-40 right-10 max-w-sm w-full z-50">
+            <div :class="passwordChangeSuccess ? 'bg-green-500' : 'bg-red-500'" class="text-white p-4 rounded-xl shadow-2xl flex items-center">
+                <svg v-if="passwordChangeSuccess" class="w-6 h-6 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                <svg v-if="passwordChangeError" class="w-6 h-6 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                <span>{{ passwordChangeSuccess || passwordChangeError }}</span>
+            </div>
+        </div>
+      </transition>
+
       <footer class="text-center mt-12 text-gray-500 dark:text-gray-400 text-sm">
         <p>Conçu avec soin pour votre épanouissement.</p>
       </footer>
     </div>
+
+    <!-- Delete Account Confirmation Modal -->
+    <transition name="fade">
+      <div v-if="showDeleteModal" class="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+        <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-2xl max-w-md w-full p-8 m-4">
+          <h3 class="text-2xl font-bold text-gray-800 dark:text-white">Confirmer la suppression</h3>
+          <p class="mt-4 text-gray-600 dark:text-gray-400">Cette action est <strong class="font-bold text-red-600 dark:text-red-400">irréversible</strong>. Pour confirmer, veuillez saisir votre mot de passe.</p>
+          
+          <div class="mt-6">
+            <label for="delete-password" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Mot de passe</label>
+            <input type="password" id="delete-password" v-model="deletePassword" @keyup.enter="handleAccountDelete" placeholder="••••••••" class="w-full p-3 border-2 border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-800 dark:text-gray-200 focus:ring-2 focus:ring-red-500 focus:border-transparent transition-all duration-200" />
+          </div>
+
+          <transition name="fade">
+            <div v-if="deleteError" class="mt-4 text-red-600 dark:text-red-400 text-sm font-medium">
+              {{ deleteError }}
+            </div>
+          </transition>
+
+          <div class="mt-8 flex justify-end gap-4">
+            <button @click="closeDeleteModal" class="px-4 py-2 text-sm rounded-lg bg-gray-200 text-gray-800 font-medium hover:bg-gray-300 dark:bg-gray-700 dark:text-gray-200 dark:hover:bg-gray-600 transition-all duration-200">
+              Annuler
+            </button>
+            <button @click="handleAccountDelete" :disabled="deleteLoading" class="px-4 py-2 text-sm rounded-lg bg-red-600 text-white font-medium hover:bg-red-700 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed">
+              <span v-if="deleteLoading">Suppression...</span>
+              <span v-else>Je comprends, supprimer</span>
+            </button>
+          </div>
+        </div>
+      </div>
+    </transition>
+
   </div>
 </template>
 

@@ -120,6 +120,31 @@ export function useAuth() {
     localStorage.removeItem('moodflow_user')
   }
 
+  const fetchUser = async () => {
+    if (!token.value) return;
+
+    try {
+      const response = await apiClient.get<{ user: User }>('/me');
+      user.value = response.data.user;
+      localStorage.setItem('moodflow_user', JSON.stringify(user.value));
+    } catch (e) {
+      console.error('Failed to fetch user', e);
+    }
+  };
+
+  const updateUser = async (data: Partial<User>) => {
+    if (!user.value) throw new Error('User not authenticated');
+
+    const response = await apiClient.patch(`/utilisateurs/${user.value.id}`, data, {
+      headers: {
+        'Content-Type': 'application/merge-patch+json',
+      }
+    });
+
+    user.value = { ...user.value, ...response.data };
+    localStorage.setItem('moodflow_user', JSON.stringify(user.value));
+  };
+
   return {
     user,
     token,
@@ -129,5 +154,7 @@ export function useAuth() {
     login,
     register,
     logout,
+    fetchUser,
+    updateUser,
   }
 }

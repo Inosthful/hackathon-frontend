@@ -9,6 +9,7 @@ import {
   TooltipComponent,
 } from "echarts/components";
 import { use } from "echarts/core";
+import { LegacyGridContainLabel } from "echarts/features"; // ✅ compatibilité containLabel
 import { CanvasRenderer } from "echarts/renderers";
 import { computed } from "vue";
 import VChart from "vue-echarts";
@@ -21,6 +22,7 @@ use([
   TooltipComponent,
   LegendComponent,
   GridComponent,
+  LegacyGridContainLabel, // ✅ ajoute le module de compatibilité
 ]);
 
 interface Props {
@@ -128,7 +130,7 @@ const barOptions = computed(() => {
       right: "4%",
       bottom: "3%",
       top: "3%",
-      outerBounds: true,
+      containLabel: true, // ✅ remis ici
     },
     xAxis: {
       type: "category",

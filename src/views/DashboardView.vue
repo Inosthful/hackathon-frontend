@@ -7,7 +7,7 @@ import { useRoute, useRouter } from "vue-router"; // Added
 import MoodChart from "../components/MoodChart.vue";
 import MoodPopup from "../components/MoodPopup.vue";
 import MoodSelector from "../components/MoodSelector.vue";
-import StreakCounter from '../components/StreakCounter.vue';
+import StreakCounter from "../components/StreakCounter.vue";
 
 import MonthView from "../components/MonthView.vue";
 import WeekView from "../components/WeekView.vue";
@@ -182,12 +182,6 @@ const handleDeleteMood = async () => {
       // IMPORTANT: Forcer la mise à jour en réinitialisant complètement
       selectedMood.value = undefined;
 
-      successMessage.value = "Humeur supprimée avec succès !";
-      showSuccess.value = true;
-      setTimeout(() => {
-        showSuccess.value = false;
-      }, 3000);
-
       // Recharger les données
       await fetchMoodEntries();
 
@@ -269,21 +263,6 @@ const handleDeleteMood = async () => {
         </p>
         <StreakCounter v-if="user" :streak="user.joursConsecutifs" />
       </header>
-
-      <Transition name="slide-fade">
-        <div
-          v-if="showSuccess"
-          class="bg-green-500 text-white p-3 sm:p-4 rounded-lg shadow-lg text-center font-medium text-sm sm:text-base"
-        >
-          ✅ {{ successMessage }}
-        </div>
-      </Transition>
-      <div
-        v-if="error"
-        class="bg-red-500 text-white p-3 sm:p-4 rounded-lg shadow-lg text-center text-sm sm:text-base"
-      >
-        ⚠️ {{ error }}
-      </div>
 
       <!-- Sélecteur de semaine -->
       <section class="fade-in relative z-10" style="animation-delay: 0.1s">

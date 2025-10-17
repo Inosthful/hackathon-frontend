@@ -104,7 +104,7 @@ const handleLogin = async () => {
 
         <!-- Lien inscription -->
         <div
-          class="text-center pt-3 sm:pt-4 border-t border-gray-200 dark:border-gray-700"
+          class="text-center pt-3 sm:pt-4 border-t border-gray-200 dark:border-gray-700 space-y-2"
         >
           <p class="text-gray-600 dark:text-gray-400 text-xs sm:text-sm">
             Pas encore de compte ?
@@ -113,6 +113,14 @@ const handleLogin = async () => {
               class="text-purple-600 dark:text-purple-400 font-semibold hover:underline"
             >
               S'inscrire
+            </router-link>
+          </p>
+          <p class="text-gray-600 dark:text-gray-400 text-xs sm:text-sm">
+            <router-link
+              to="/forgot-password"
+              class="text-purple-600 dark:text-purple-400 font-semibold hover:underline"
+            >
+              Mot de passe oublié ?
             </router-link>
           </p>
         </div>

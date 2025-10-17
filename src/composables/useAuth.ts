@@ -165,6 +165,34 @@ export function useAuth() {
     console.log('[useAuth] Account deleted and logged out.');
   };
 
+  const requestPasswordReset = async (email: string) => {
+    loading.value = true;
+    error.value = null;
+    try {
+      const response = await apiClient.post('/forgot-password', { email });
+      return response.data;
+    } catch (e: any) {
+      error.value = e.response?.data?.message || 'Erreur lors de la demande de réinitialisation.';
+      return null;
+    } finally {
+      loading.value = false;
+    }
+  };
+
+  const resetPassword = async (token: string, password: string, confirmPassword: string) => {
+    loading.value = true;
+    error.value = null;
+    try {
+      const response = await apiClient.post('/reset-password', { token, password, confirmPassword });
+      return response.data;
+    } catch (e: any) {
+      error.value = e.response?.data?.message || 'Erreur lors de la réinitialisation du mot de passe.';
+      return null;
+    } finally {
+      loading.value = false;
+    }
+  };
+
   return {
     user,
     token,
@@ -179,5 +207,7 @@ export function useAuth() {
     requestEmailChange,
     changePassword,
     deleteAccount,
+    requestPasswordReset,
+    resetPassword,
   }
 }

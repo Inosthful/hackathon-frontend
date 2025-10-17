@@ -1,5 +1,4 @@
 <script setup lang="ts">
-import { useAuth } from "@/composables/useAuth";
 import { useMoodData } from "@/composables/useMoodData";
 import type { MoodType } from "@/types/mood";
 import { computed, onMounted, ref } from "vue";

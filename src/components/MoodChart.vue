@@ -128,7 +128,7 @@ const barOptions = computed(() => {
       right: "4%",
       bottom: "3%",
       top: "3%",
-      containLabel: true,
+      outerBounds: true,
     },
     xAxis: {
       type: "category",

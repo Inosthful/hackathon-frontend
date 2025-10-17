@@ -10,14 +10,12 @@ const currentDate = ref(new Date());
 
 export function useMoodData() {
 
-  // Récupérer les humeurs pour une période donnée
   const fetchMoodEntries = async (startDate?: string, endDate?: string) => {
     loading.value = true
     error.value = null
     try {
       const entries = await apiService.getMoodEntries(startDate, endDate)
 
-      // Détecter les doublons (plusieurs entrées pour la même date)
       const dateMap = new Map<string, MoodEntry[]>()
       entries.forEach(entry => {
         const date = entry.date?.substring(0, 10)
@@ -29,7 +27,6 @@ export function useMoodData() {
         }
       })
 
-      // Afficher un warning si on trouve des doublons
       dateMap.forEach((entriesForDate, date) => {
         if (entriesForDate.length > 1) {
           console.warn(`⚠️ Doublons détectés pour la date ${date}:`, entriesForDate.map(e => `ID:${e.id} Mood:${e.mood}`))
@@ -45,7 +42,6 @@ export function useMoodData() {
     }
   }
 
-  // Récupérer l'humeur pour une date spécifique
   const fetchMoodByDate = async (date: string) => {
     loading.value = true
     error.value = null
@@ -63,36 +59,26 @@ export function useMoodData() {
     loading.value = true
     error.value = null
     try {
-      // Normaliser la date pour la comparaison (garder seulement YYYY-MM-DD)
       const targetDate = mood.date.substring(0, 10)
 
-      // Trouver TOUTES les humeurs pour cette date
       const existingEntries = moodEntries.value.filter(entry => {
         if (!entry.date) return false
         const entryDate = entry.date.substring(0, 10)
         return entryDate === targetDate
       })
 
-      console.log('saveMood - Date cible:', targetDate)
-      console.log('saveMood - Nombre d\'entrées existantes:', existingEntries.length)
-      console.log('saveMood - Entrées existantes:', existingEntries)
-
       if (existingEntries.length > 0) {
-        // S'il y a plusieurs entrées, prendre la plus récente (ID le plus élevé)
         const existing = existingEntries.reduce((latest, current) => {
           return (current.id && latest.id && current.id > latest.id) ? current : latest
         })
 
-        console.log('Mise à jour de l\'humeur la plus récente, ID:', existing.id)
         const updated = await apiService.updateMoodEntry(existing.id!, mood)
 
-        // Mettre à jour l'entrée dans le tableau local
         const index = moodEntries.value.findIndex(e => e.id === existing.id)
         if (index !== -1) {
           moodEntries.value[index] = updated
         }
 
-        // Supprimer les doublons éventuels (les autres entrées pour cette date)
         if (existingEntries.length > 1) {
           console.warn('⚠️ Suppression des doublons pour la date', targetDate)
           for (const entry of existingEntries) {
@@ -100,7 +86,6 @@ export function useMoodData() {
               try {
                 await apiService.deleteMoodEntry(entry.id)
                 moodEntries.value = moodEntries.value.filter(e => e.id !== entry.id)
-                console.log('Doublon supprimé, ID:', entry.id)
               } catch (deleteError) {
                 console.error('Erreur lors de la suppression du doublon:', deleteError)
               }
@@ -110,8 +95,6 @@ export function useMoodData() {
 
         return updated
       } else {
-        // Créer
-        console.log('Création d\'une nouvelle humeur')
         const created = await apiService.createMoodEntry(mood)
         moodEntries.value.push(created)
         return created
@@ -125,7 +108,6 @@ export function useMoodData() {
     }
   }
 
-  // Supprimer une humeur
   const deleteMood = async (id: number) => {
     loading.value = true
     error.value = null
@@ -148,7 +130,6 @@ export function useMoodData() {
     return `${year}-${month}-${day}`;
   }
 
-  // Obtenir les humeurs de la semaine pour la date courante
   const getWeekMoods = () => {
     const weekStart = new Date(currentDate.value);
     const day = weekStart.getDay();
@@ -195,7 +176,6 @@ export function useMoodData() {
     return weekDays;
   }
 
-  // Obtenir les humeurs du mois complet pour la date courante
   const getMonthMoods = () => {
     const month = new Date(currentDate.value)
     month.setDate(1)
@@ -207,12 +187,10 @@ export function useMoodData() {
 
     const monthDays = []
 
-    // Ajouter des jours vides pour aligner le premier jour
     for (let i = 0; i < (firstDayOfMonth === 0 ? 6 : firstDayOfMonth - 1); i++) {
       monthDays.push(null)
     }
 
-    // Ajouter tous les jours du mois
     for (let i = 1; i <= daysInMonth; i++) {
       const date = new Date(year, monthIndex, i)
       const dateStr = toISODateString(date)
@@ -305,18 +283,24 @@ export function useMoodData() {
     currentDate.value = new Date(date);
   };
 
-  // Vérifier si une humeur existe pour aujourd'hui
+  const nextMonth = () => {
+    currentDate.value.setMonth(currentDate.value.getMonth() + 1);
+    currentDate.value = new Date(currentDate.value);
+  };
+
+  const previousMonth = () => {
+    currentDate.value.setMonth(currentDate.value.getMonth() - 1);
+    currentDate.value = new Date(currentDate.value);
+  };
+
   const hasTodayMood = () => {
     const today = toISODateString(new Date())
     return moodEntries.value.some(entry => (entry.date || '').substring(0, 10) === today)
   }
 
-  // Nettoyer tous les doublons en BDD
   const cleanupDuplicates = async () => {
-    console.log('🧹 Nettoyage des doublons en cours...')
     const dateMap = new Map<string, MoodEntry[]>()
 
-    // Grouper par date
     moodEntries.value.forEach(entry => {
       const date = entry.date?.substring(0, 10)
       if (date) {
@@ -327,16 +311,13 @@ export function useMoodData() {
       }
     })
 
-    // Supprimer les doublons
     let deletedCount = 0
     for (const [date, entries] of dateMap) {
       if (entries.length > 1) {
-        // Garder celui avec l'ID le plus élevé
         const sorted = entries.sort((a, b) => (b.id || 0) - (a.id || 0))
         const toKeep = sorted[0]
         const toDelete = sorted.slice(1)
 
-        console.log(`📅 Date ${date}: Garder ID ${toKeep.id}, Supprimer ${toDelete.length} doublons`)
 
         for (const entry of toDelete) {
           if (entry.id) {
@@ -344,16 +325,13 @@ export function useMoodData() {
               await apiService.deleteMoodEntry(entry.id)
               moodEntries.value = moodEntries.value.filter(e => e.id !== entry.id)
               deletedCount++
-              console.log(`  ✓ Doublon ID ${entry.id} supprimé`)
             } catch (e) {
-              console.error(`  ✗ Erreur suppression ID ${entry.id}:`, e)
             }
           }
         }
       }
     }
 
-    console.log(`✅ Nettoyage terminé: ${deletedCount} doublons supprimés`)
     return deletedCount
   }
 
@@ -373,6 +351,8 @@ export function useMoodData() {
     nextWeek,
     previousWeek,
     setWeek,
+    nextMonth,
+    previousMonth,
     hasTodayMood,
     cleanupDuplicates,
   }

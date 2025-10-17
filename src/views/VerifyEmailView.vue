@@ -23,7 +23,7 @@ onMounted(async () => {
     message.value = response.data.message || 'Email verified successfully! You can now log in.';
     setTimeout(() => {
       router.push('/login');
-    }, 3000); // Redirect to login after 3 seconds
+    }, 3000);
   } catch (e: any) {
     verificationStatus.value = 'error';
     message.value = e.response?.data?.message || 'Failed to verify email. Please try again or contact support.';
@@ -33,7 +33,6 @@ onMounted(async () => {
 
 <template>
   <div class="min-h-screen flex items-center justify-center bg-[#FAF7F2] dark:bg-gray-900 p-4 relative">
-    <!-- Background SVG décoratif -->
     <div class="absolute top-0 left-0 w-full h-full overflow-hidden z-0">
       <svg width="100%" height="100%" viewBox="0 0 1440 500" preserveAspectRatio="xMidYMid slice" xmlns="http://www.w3.org/2000/svg">
         <defs>
@@ -82,5 +81,4 @@ onMounted(async () => {
 </template>
 
 <style scoped>
-/* Add any specific styles for this component here */
 </style>

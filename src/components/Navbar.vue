@@ -16,9 +16,7 @@ const handleLogout = () => {
     <div
       class="max-w-7xl mx-auto px-4 py-3 sm:py-4 flex items-center justify-between"
     >
-      <!-- Left side: Profile Avatar + Accueil button -->
       <div class="flex items-center gap-3 sm:gap-4">
-        <!-- Profile Avatar (clickable) -->
         <router-link to="/profile" class="group">
           <div class="flex items-center gap-2 sm:gap-3 cursor-pointer">
             <div
@@ -38,7 +36,6 @@ const handleLogout = () => {
         </router-link>
       </div>
 
-      <!-- Right side: Actions -->
       <div class="flex items-center gap-3 sm:gap-4">
         <button
           @click="handleLogout"

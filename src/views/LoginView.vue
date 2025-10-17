@@ -25,7 +25,6 @@ const handleLogin = async () => {
   <div
     class="login-view min-h-screen flex items-center justify-center bg-[#FAF7F2] dark:bg-gray-900 p-4 relative"
   >
-    <!-- Background SVG décoratif -->
     <div class="absolute top-0 left-0 w-full h-full overflow-hidden z-0">
       <svg
         width="100%"
@@ -64,11 +63,9 @@ const handleLogin = async () => {
     </div>
 
     <div class="login-card max-w-md w-full relative z-10">
-      <!-- Card -->
       <div
         class="bg-white/60 dark:bg-gray-800/60 backdrop-blur-xl rounded-3xl shadow-2xl shadow-gray-200/50 dark:shadow-black/20 p-6 sm:p-8 space-y-4 sm:space-y-6"
       >
-        <!-- Header -->
         <div class="text-center space-y-1 sm:space-y-2">
           <h1
             class="text-2xl sm:text-3xl lg:text-4xl font-extrabold text-gray-800 dark:text-white tracking-tighter"
@@ -84,7 +81,6 @@ const handleLogin = async () => {
           </p>
         </div>
 
-        <!-- Message d'erreur -->
         <Transition name="slide-fade">
           <div
             v-if="error"
@@ -96,9 +92,7 @@ const handleLogin = async () => {
           </div>
         </Transition>
 
-        <!-- Formulaire -->
         <form @submit.prevent="handleLogin" class="space-y-3 sm:space-y-4">
-          <!-- Email -->
           <div>
             <label
               for="email"
@@ -116,7 +110,6 @@ const handleLogin = async () => {
             />
           </div>
 
-          <!-- Password -->
           <div>
             <label
               for="password"
@@ -134,7 +127,6 @@ const handleLogin = async () => {
             />
           </div>
 
-          <!-- Bouton connexion -->
           <button
             type="submit"
             :disabled="loading"
@@ -144,7 +136,6 @@ const handleLogin = async () => {
           </button>
         </form>
 
-        <!-- Lien inscription -->
         <div
           class="text-center pt-3 sm:pt-4 border-t border-gray-200 dark:border-gray-700 space-y-2"
         >

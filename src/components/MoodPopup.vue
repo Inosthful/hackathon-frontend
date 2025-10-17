@@ -20,25 +20,20 @@ const emit = defineEmits<Emits>();
 const selectedMood = ref<MoodType | undefined>();
 const currentQuote = ref<string>("");
 
-// Réinitialiser l'état quand la popup s'ouvre
 watch(() => props.show, (newValue) => {
   if (newValue) {
-    // La popup vient de s'ouvrir, on reset tout
     selectedMood.value = undefined;
     currentQuote.value = "";
-    console.log('MoodPopup - Réinitialisation à l\'ouverture');
   }
 });
 
 const handleMoodSelect = (mood: MoodType) => {
-  console.log('MoodPopup - Sélection:', mood);
   selectedMood.value = mood;
   currentQuote.value = getRandomQuote(mood);
 };
 
 const handleSave = () => {
   if (!selectedMood.value) return;
-  console.log('MoodPopup - Sauvegarde:', selectedMood.value);
   emit("save", {
     mood: selectedMood.value,
   });
@@ -47,7 +42,6 @@ const handleSave = () => {
 };
 
 const handleClose = () => {
-  console.log('MoodPopup - Fermeture');
   emit("close");
   selectedMood.value = undefined;
   currentQuote.value = "";
@@ -64,7 +58,6 @@ const handleClose = () => {
       <div
         class="bg-white/60 dark:bg-gray-800/60 backdrop-blur-xl rounded-3xl shadow-2xl shadow-gray-200/50 dark:shadow-black/20 border border-white/30 dark:border-gray-700/30 max-w-2xl w-full max-h-[90vh] overflow-y-auto transform transition-all"
       >
-        <!-- Header -->
         <div
           class="p-6 sm:p-8 border-b border-gray-200/50 dark:border-gray-700/50"
         >
@@ -103,16 +96,13 @@ const handleClose = () => {
           </div>
         </div>
 
-        <!-- Content -->
         <div class="p-6 sm:p-8 space-y-6">
-          <!-- Sélecteur d’humeur -->
           <MoodSelector
             :selectedMood="selectedMood"
             :disabled="loading"
             @select="handleMoodSelect"
           />
 
-          <!-- Citation motivante -->
           <Transition name="quote-fade">
             <div
               v-if="currentQuote"
@@ -130,7 +120,6 @@ const handleClose = () => {
           </Transition>
         </div>
 
-        <!-- Footer -->
         <div
           class="p-6 sm:p-8 border-t border-gray-200/50 dark:border-gray-700/50 flex flex-col sm:flex-row gap-3 justify-end"
         >
@@ -154,7 +143,6 @@ const handleClose = () => {
 </template>
 
 <style scoped>
-/* Transitions du modal */
 .modal-enter-active,
 .modal-leave-active {
   transition: opacity 0.3s ease;
@@ -172,7 +160,6 @@ const handleClose = () => {
   transform: scale(0.9) translateY(-20px);
 }
 
-/* Citation */
 .quote-fade-enter-active,
 .quote-fade-leave-active {
   transition: all 0.5s ease-out;

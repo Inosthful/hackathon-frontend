@@ -1,17 +1,23 @@
 <script setup lang="ts">
 import { useMoodData } from "@/composables/useMoodData";
-import { computed, ref } from "vue";
+import { computed, ref, defineProps } from "vue";
 
-const { currentDate, previousWeek, nextWeek, setWeek } = useMoodData();
+const props = defineProps<{ viewMode: "week" | "month" }>();
+
+const { currentDate, previousWeek, nextWeek, setWeek, previousMonth, nextMonth } = useMoodData();
 const showCalendar = ref(false);
 
-const weekRange = computed(() => {
+const displayRange = computed(() => {
+  if (props.viewMode === 'month') {
+    return currentDate.value.toLocaleDateString("fr-FR", { month: "long", year: "numeric" });
+  }
+
   const start = new Date(currentDate.value);
   const day = start.getDay();
-  const diff = start.getDate() - day + (day === 0 ? -6 : 1); // adjust when day is sunday
+  const diff = start.getDate() - day + (day === 0 ? -6 : 1);
   start.setDate(diff);
   const end = new Date(start);
-  end.setDate(end.getDate() + 6); // Sunday
+  end.setDate(end.getDate() + 6);
 
   const startMonth = start.toLocaleDateString("fr-FR", { month: "short" });
   const endMonth = end.toLocaleDateString("fr-FR", { month: "short" });
@@ -23,6 +29,22 @@ const weekRange = computed(() => {
   }
 });
 
+const handlePrevious = () => {
+  if (props.viewMode === 'week') {
+    previousWeek();
+  } else {
+    previousMonth();
+  }
+};
+
+const handleNext = () => {
+  if (props.viewMode === 'week') {
+    nextWeek();
+  } else {
+    nextMonth();
+  }
+};
+
 const calendarDays = computed(() => {
   const month = new Date(currentDate.value);
   month.setDate(1);
@@ -33,11 +55,9 @@ const calendarDays = computed(() => {
   const daysInMonth = new Date(year, monthIndex + 1, 0).getDate();
 
   const days = [];
-  // Add empty days for the first week
   for (let i = 0; i < (firstDayOfMonth === 0 ? 6 : firstDayOfMonth - 1); i++) {
     days.push(null);
   }
-  // Add days of the month
   for (let i = 1; i <= daysInMonth; i++) {
     days.push(new Date(year, monthIndex, i));
   }
@@ -54,10 +74,10 @@ const selectDate = (date: Date | null) => {
 const isDateInCurrentWeek = (date: Date) => {
   const start = new Date(currentDate.value);
   const day = start.getDay();
-  const diff = start.getDate() - day + (day === 0 ? -6 : 1); // adjust when day is sunday
+  const diff = start.getDate() - day + (day === 0 ? -6 : 1);
   start.setDate(diff);
   const end = new Date(start);
-  end.setDate(end.getDate() + 6); // Sunday
+  end.setDate(end.getDate() + 6);
   return (
     date.getFullYear() === start.getFullYear() &&
     date.getMonth() === start.getMonth() &&
@@ -72,7 +92,7 @@ const isDateInCurrentWeek = (date: Date) => {
     class="week-selector bg-white/70 dark:bg-gray-800/70 backdrop-blur-xl p-2 sm:p-4 rounded-3xl shadow-[0_6px_25px_rgb(0,0,0,0.1)] flex items-center justify-between"
   >
     <button
-      @click="previousWeek"
+      @click="handlePrevious"
       class="p-2 rounded-full hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
     >
       <svg
@@ -94,14 +114,15 @@ const isDateInCurrentWeek = (date: Date) => {
     <div class="relative">
       <button
         @click="showCalendar = !showCalendar"
+        :disabled="props.viewMode === 'month'"
         class="text-base sm:text-lg font-semibold text-gray-800 dark:text-gray-200 hover:bg-gradient-to-r hover:from-[#A5D6A7] hover:to-[#80CBC4] hover:bg-clip-text hover:text-transparent transition-colors text-center"
       >
-        {{ weekRange }}
+        {{ displayRange }}
       </button>
 
       <transition name="fade">
         <div
-          v-if="showCalendar"
+          v-if="showCalendar && props.viewMode === 'week'"
           class="absolute z-50 mt-2 w-80 bg-white/70 dark:bg-gray-800/70 backdrop-blur-xl p-6 rounded-2xl shadow-[0_8px_30px_rgb(0,0,0,0.15)] border-2 border-gray-200/30 dark:border-gray-700/30 left-1/2 -translate-x-1/2"
         >
           <div class="flex items-center justify-between mb-4">
@@ -194,7 +215,7 @@ const isDateInCurrentWeek = (date: Date) => {
     </div>
 
     <button
-      @click="nextWeek"
+      @click="handleNext"
       class="p-2 rounded-full hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
     >
       <svg

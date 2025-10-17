@@ -36,7 +36,6 @@ const selectDay = (date: string) => emit("selectDate", date);
   <div
     class="month-view bg-white/70 dark:bg-gray-800/70 backdrop-blur-xl p-5 sm:p-8 rounded-3xl shadow-[0_8px_30px_rgb(0,0,0,0.12)] border border-gray-200/30 dark:border-gray-700/30 transition-all duration-300"
   >
-    <!-- En-têtes des jours -->
     <div class="grid grid-cols-7 gap-2 mb-4">
       <div
         v-for="day in ['Lun', 'Mar', 'Mer', 'Jeu', 'Ven', 'Sam', 'Dim']"
@@ -47,13 +46,10 @@ const selectDay = (date: string) => emit("selectDate", date);
       </div>
     </div>
 
-    <!-- Grille du calendrier -->
     <div class="grid grid-cols-7 gap-2">
       <template v-for="(day, index) in monthDays" :key="index">
-        <!-- Jour vide -->
         <div v-if="!day" class="aspect-square"></div>
 
-        <!-- Jour -->
         <div
           v-else
           @click="selectDay(day.date)"

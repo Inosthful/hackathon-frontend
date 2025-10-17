@@ -154,15 +154,12 @@ export function useAuth() {
   };
 
   const changePassword = async (passwordData: { currentPassword, newPassword }) => {
-    console.log('[useAuth] Requesting password change.');
     return apiClient.post('/user/change-password', passwordData);
   };
 
   const deleteAccount = async (password: string) => {
-    console.log('[useAuth] Requesting account deletion.');
     await apiClient.delete('/user', { data: { password } });
-    logout(); // Clear local state and storage after successful deletion
-    console.log('[useAuth] Account deleted and logged out.');
+    logout();
   };
 
   const requestPasswordReset = async (email: string) => {

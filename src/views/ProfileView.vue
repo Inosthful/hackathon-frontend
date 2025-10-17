@@ -31,7 +31,6 @@ const passwordChangeLoading = ref(false);
 const passwordChangeSuccess = ref("");
 const passwordChangeError = ref("");
 
-// Delete Account Modal State
 const showDeleteModal = ref(false);
 const deletePassword = ref("");
 const deleteLoading = ref(false);
@@ -100,7 +99,7 @@ const handleEmailChange = async () => {
     newEmail.value = "";
     setTimeout(() => {
       emailChangeSuccess.value = "";
-      logout(); // Log out the user after 5 seconds
+      logout();
     }, 5000);
   } catch (error: any) {
     const backendMessage = error.response?.data?.message;
@@ -156,7 +155,7 @@ const handlePasswordChange = async () => {
     passwordChangeError.value =
       errorMap[backendMessage] ||
       "Une erreur inattendue est survenue. Veuillez réessayer.";
-    setTimeout(() => (passwordChangeError.value = ""), 5000); // Délai légèrement plus long pour les erreurs
+    setTimeout(() => (passwordChangeError.value = ""), 5000);
   } finally {
     passwordChangeLoading.value = false;
   }
@@ -182,8 +181,6 @@ const handleAccountDelete = async () => {
 
   try {
     await deleteAccount(deletePassword.value);
-    // On success, the useAuth composable logs the user out.
-    // We just need to redirect.
     router.push("/login");
   } catch (error: any) {
     const backendMessage = error.response?.data?.message;
@@ -597,7 +594,6 @@ const handleAccountDelete = async () => {
       </footer>
     </div>
 
-    <!-- Delete Account Confirmation Modal -->
     <transition name="fade">
       <div
         v-if="showDeleteModal"

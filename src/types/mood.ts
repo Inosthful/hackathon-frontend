@@ -1,5 +1,3 @@
-// Types pour MoodFlow+
-
 export type MoodType = 'happy' | 'good' | 'neutral' | 'sad' | 'angry'
 
 export interface MoodEntry {

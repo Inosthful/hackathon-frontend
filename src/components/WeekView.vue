@@ -37,8 +37,6 @@ const selectDay = (date: string) => {
 
 <template>
   <div class="week-view">
-
-    <!-- Mobile layout: 4+3 -->
     <div class="sm:hidden flex flex-col items-center space-y-2">
       <div class="grid grid-cols-4 gap-2 w-full">
         <DayCard
@@ -62,7 +60,6 @@ const selectDay = (date: string) => {
       </div>
     </div>
 
-    <!-- Desktop layout: single row -->
     <div class="hidden sm:grid grid-cols-7 gap-1 sm:gap-2 md:gap-3 lg:gap-4">
       <DayCard
         v-for="day in weekDays"

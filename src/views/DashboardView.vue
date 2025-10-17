@@ -1,9 +1,9 @@
 <script setup lang="ts">
-import { useAuth } from "@/composables/useAuth"; // Added
+import { useAuth } from "@/composables/useAuth";
 import { useMoodData } from "@/composables/useMoodData";
 import type { MoodEntry, MoodType } from "@/types/mood";
 import { computed, onMounted, ref } from "vue";
-import { useRoute, useRouter } from "vue-router"; // Added
+import { useRoute, useRouter } from "vue-router";
 import MoodChart from "../components/MoodChart.vue";
 import MoodPopup from "../components/MoodPopup.vue";
 import MoodSelector from "../components/MoodSelector.vue";
@@ -14,8 +14,8 @@ import WeekView from "../components/WeekView.vue";
 
 import WeekSelector from "../components/WeekSelector.vue";
 
-const router = useRouter(); // Added
-const route = useRoute(); // Added
+const router = useRouter();
+const route = useRoute();
 
 const {
   loading,
@@ -31,9 +31,9 @@ const {
   cleanupDuplicates,
 } = useMoodData();
 
-const { fetchUser, user } = useAuth(); // Added
+const { fetchUser, user } = useAuth();
 
-const emailChangedSuccessMessage = ref(""); // Added
+const emailChangedSuccessMessage = ref("");
 
 const toISODateString = (date: Date) => {
   const year = date.getFullYear();
@@ -54,7 +54,6 @@ const weekDays = computed(() => getWeekMoods());
 const monthDays = computed(() => getMonthMoods());
 
 const currentDayMood = computed(() => {
-  // Chercher directement dans moodEntries pour que ça fonctionne dans les deux vues
   const targetDate = selectedDate.value.substring(0, 10);
   return moodEntries.value.find((entry) => {
     const entryDate = (entry.date || "").substring(0, 10);
@@ -70,10 +69,8 @@ const isSameMood = computed(() => {
 onMounted(async () => {
   await fetchMoodEntries();
 
-  // Nettoyer automatiquement les doublons au chargement
   const duplicatesCount = await cleanupDuplicates();
   if (duplicatesCount > 0) {
-    // Recharger après le nettoyage
     await fetchMoodEntries();
   }
 
@@ -106,10 +103,6 @@ const saveMoodEntry = async () => {
 
   const isUpdate = !!currentDayMood.value;
 
-  console.log("DashboardView - Date sélectionnée:", selectedDate.value);
-  console.log("DashboardView - Humeur actuelle du jour:", currentDayMood.value);
-  console.log("DashboardView - Humeur à sauvegarder:", selectedMood.value);
-
   try {
     const savedMood = await saveMood({
       date: selectedDate.value,
@@ -117,19 +110,8 @@ const saveMoodEntry = async () => {
       beginAt: new Date().toISOString(),
     });
 
-    // Recharger les données
     await fetchMoodEntries();
-
-    // Mettre à jour selectedMood avec la nouvelle valeur sauvegardée
     selectedMood.value = savedMood;
-    console.log(
-      "DashboardView - Après sauvegarde, selectedMood:",
-      selectedMood.value
-    );
-    console.log(
-      "DashboardView - Après sauvegarde, currentDayMood:",
-      currentDayMood.value
-    );
   } catch (e) {
     console.error("Erreur lors de l'enregistrement:", e);
   }
@@ -147,22 +129,11 @@ const handlePopupSave = async (data: { mood: MoodType }) => {
       beginAt: new Date().toISOString(),
     });
 
-    // Fermer la popup
     showMoodPopup.value = false;
-
-    // Afficher un message de succès
-
-    // Recharger les données
     await fetchMoodEntries();
 
-    // Mettre à jour la sélection pour aujourd'hui avec l'humeur sauvegardée
     selectedDate.value = toISODateString(new Date());
     selectedMood.value = savedMood;
-
-    console.log(
-      "DashboardView - Après sauvegarde popup, selectedMood:",
-      selectedMood.value
-    );
   } catch (e) {
     console.error("Erreur lors de l'enregistrement depuis la popup:", e);
   }
@@ -173,23 +144,9 @@ const handleDeleteMood = async () => {
 
   if (confirm("Êtes-vous sûr de vouloir supprimer cette humeur ?")) {
     try {
-      console.log(
-        "DashboardView - Suppression de l'humeur ID:",
-        currentDayMood.value.id
-      );
       await deleteMood(currentDayMood.value.id);
-
-      // IMPORTANT: Forcer la mise à jour en réinitialisant complètement
       selectedMood.value = undefined;
-
-      // Recharger les données
       await fetchMoodEntries();
-
-      // Forcer la mise à jour de l'affichage
-      console.log(
-        "DashboardView - Après suppression, currentDayMood:",
-        currentDayMood.value
-      );
     } catch (e) {
       console.error("Erreur lors de la suppression:", e);
     }
@@ -201,7 +158,6 @@ const handleDeleteMood = async () => {
   <div
     class="dashboard min-h-screen bg-[#FAF7F2] dark:bg-gray-900 transition-colors duration-300 relative"
   >
-    <!-- Background SVG décoratif -->
     <div class="absolute top-0 left-0 w-full h-full overflow-hidden z-0">
       <svg
         width="100%"
@@ -238,7 +194,6 @@ const handleDeleteMood = async () => {
         />
       </svg>
     </div>
-    <!-- Popup d'humeur quotidienne -->
     <MoodPopup
       :show="showMoodPopup"
       :loading="loading"
@@ -264,12 +219,10 @@ const handleDeleteMood = async () => {
         <StreakCounter v-if="user" :streak="user.joursConsecutifs" />
       </header>
 
-      <!-- Sélecteur de semaine -->
       <section class="fade-in relative z-10" style="animation-delay: 0.1s">
-        <WeekSelector />
+        <WeekSelector :view-mode="viewMode" />
       </section>
 
-      <!-- Toggle Vue Semaine / Mois -->
       <section
         class="fade-in flex justify-center"
         style="animation-delay: 0.15s"
@@ -302,7 +255,6 @@ const handleDeleteMood = async () => {
         </div>
       </section>
 
-      <!-- Vue de la semaine -->
       <section
         v-if="viewMode === 'week'"
         class="fade-in"
@@ -315,7 +267,6 @@ const handleDeleteMood = async () => {
         />
       </section>
 
-      <!-- Vue du mois -->
       <section
         v-if="viewMode === 'month'"
         class="fade-in"
@@ -328,7 +279,6 @@ const handleDeleteMood = async () => {
         />
       </section>
 
-      <!-- Sélecteur d'humeur -->
       <section class="fade-in" style="animation-delay: 0.3s">
         <div
           class="bg-white/70 dark:bg-gray-800/70 backdrop-blur-xl p-4 sm:p-6 lg:p-8 rounded-3xl shadow-[0_8px_30px_rgb(0,0,0,0.12)]"
@@ -397,7 +347,6 @@ const handleDeleteMood = async () => {
 </template>
 
 <style scoped>
-/* Animations */
 .fade-in {
   animation: fadeIn 0.5s ease-out forwards;
   opacity: 0;
@@ -409,7 +358,6 @@ const handleDeleteMood = async () => {
   }
 }
 
-/* Transitions pour les messages */
 .slide-fade-enter-active {
   transition: all 0.3s ease-out;
 }

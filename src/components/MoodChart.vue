@@ -13,7 +13,6 @@ import { CanvasRenderer } from "echarts/renderers";
 import { computed } from "vue";
 import VChart from "vue-echarts";
 
-// Enregistrer les composants ECharts nécessaires
 use([
   CanvasRenderer,
   PieChart,
@@ -30,7 +29,6 @@ interface Props {
 
 const props = defineProps<Props>();
 
-// Options pour le graphique en donut (camembert)
 const doughnutOptions = computed(() => {
   const data = Object.entries(props.stats.moodDistribution).map(
     ([mood, count]) => ({
@@ -99,7 +97,6 @@ const doughnutOptions = computed(() => {
   };
 });
 
-// Options pour le graphique en barres
 const barOptions = computed(() => {
   const categories = Object.keys(props.stats.moodDistribution).map(
     (mood) =>
@@ -196,7 +193,6 @@ const trendColor = computed(() => {
 
 <template>
   <div class="mood-chart space-y-4 sm:space-y-6">
-    <!-- Statistiques générales -->
     <div class="stats-grid grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-4">
       <div
         class="stat-card bg-gradient-to-br from-[#A5D6A7]/20 to-[#80CBC4]/20 dark:from-[#A5D6A7]/10 dark:to-[#80CBC4]/10 backdrop-blur-sm p-4 sm:p-6 rounded-2xl shadow-xl border border-[#A5D6A7]/30 dark:border-[#A5D6A7]/20"
@@ -245,7 +241,6 @@ const trendColor = computed(() => {
       </div>
     </div>
 
-    <!-- Graphiques ECharts -->
     <div class="charts-grid grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6">
       <div
         class="chart-container bg-white/70 dark:bg-gray-800/70 backdrop-blur-xl p-4 sm:p-6 rounded-2xl shadow-[0_6px_25px_rgb(0,0,0,0.1)] border border-gray-200/30 dark:border-gray-700/30"

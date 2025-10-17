@@ -1,4 +1,3 @@
-// Citations motivantes par type d'humeur
 
 import type { MoodType } from '@/types/mood'
 
@@ -40,7 +39,6 @@ export const MOOD_QUOTES: Record<MoodType, string[]> = {
   ]
 }
 
-// Fonction pour obtenir une citation aléatoire selon l'humeur
 export const getRandomQuote = (mood: MoodType): string => {
   const quotes = MOOD_QUOTES[mood]
   const randomIndex = Math.floor(Math.random() * quotes.length)

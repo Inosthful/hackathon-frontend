@@ -20,9 +20,8 @@ const formData = ref<RegisterData>({
 });
 
 const nextStep = () => {
-  error.value = null; // Clear previous errors
+  error.value = null;
 
-  // Basic validation for step 1
   if (
     !formData.value.prenom ||
     !formData.value.nom ||
@@ -33,7 +32,6 @@ const nextStep = () => {
     return;
   }
 
-  // Age validation
   const birthDate = new Date(formData.value.dateAnniversaire);
   const today = new Date();
   let age = today.getFullYear() - birthDate.getFullYear();
@@ -71,7 +69,6 @@ const handleRegister = async () => {
   <div
     class="register-view min-h-screen flex items-center justify-center bg-[#FAF7F2] dark:bg-gray-900 p-4 relative"
   >
-    <!-- Background SVG décoratif -->
     <div class="absolute top-0 left-0 w-full h-full overflow-hidden z-0">
       <svg
         width="100%"
@@ -110,11 +107,9 @@ const handleRegister = async () => {
     </div>
 
     <div class="register-card max-w-md w-full relative z-10">
-      <!-- Card -->
       <div
         class="bg-white/60 dark:bg-gray-800/60 backdrop-blur-xl rounded-3xl shadow-2xl shadow-gray-200/50 dark:shadow-black/20 p-6 sm:p-8 space-y-4 sm:space-y-6"
       >
-        <!-- Header -->
         <div class="text-center space-y-1 sm:space-y-2">
           <h1
             class="text-2xl sm:text-3xl lg:text-4xl font-extrabold text-gray-800 dark:text-white tracking-tighter"
@@ -130,7 +125,6 @@ const handleRegister = async () => {
           </p>
         </div>
 
-        <!-- Message d'erreur -->
         <Transition name="slide-fade">
           <div
             v-if="error"
@@ -142,7 +136,6 @@ const handleRegister = async () => {
           </div>
         </Transition>
 
-        <!-- Registration Success Message -->
         <Transition name="slide-fade">
           <div
             v-if="registrationSuccessMessage"
@@ -154,14 +147,11 @@ const handleRegister = async () => {
           </div>
         </Transition>
 
-        <!-- Formulaire -->
         <form
           @submit.prevent="step === 1 ? nextStep() : handleRegister()"
           class="space-y-3 sm:space-y-4"
         >
-          <!-- Step 1: User Info -->
           <div v-if="step === 1" class="space-y-3 sm:space-y-4">
-            <!-- Nom -->
             <div>
               <label
                 for="lastName"
@@ -179,7 +169,6 @@ const handleRegister = async () => {
               />
             </div>
 
-            <!-- Prénom -->
             <div>
               <label
                 for="firstName"
@@ -197,7 +186,6 @@ const handleRegister = async () => {
               />
             </div>
 
-            <!-- Email -->
             <div>
               <label
                 for="email"
@@ -215,7 +203,6 @@ const handleRegister = async () => {
               />
             </div>
 
-            <!-- Date anniversaire -->
             <div>
               <label
                 for="birthDate"
@@ -233,9 +220,7 @@ const handleRegister = async () => {
             </div>
           </div>
 
-          <!-- Step 2: Password -->
           <div v-if="step === 2" class="space-y-3 sm:space-y-4">
-            <!-- Password -->
             <div>
               <label
                 for="password"
@@ -257,7 +242,6 @@ const handleRegister = async () => {
               </p>
             </div>
 
-            <!-- Password Confirm -->
             <div>
               <label
                 for="passwordConfirm"
@@ -277,7 +261,6 @@ const handleRegister = async () => {
             </div>
           </div>
 
-          <!-- Boutons de navigation -->
           <div
             class="flex flex-col sm:flex-row gap-2 sm:gap-3"
             :class="[step === 1 ? 'sm:justify-end' : 'sm:justify-between']"
@@ -306,7 +289,6 @@ const handleRegister = async () => {
           </div>
         </form>
 
-        <!-- Lien connexion -->
         <div
           class="text-center pt-3 sm:pt-4 border-t border-gray-200 dark:border-gray-700"
         >

@@ -10,7 +10,7 @@ const error = ref<string | null>(null)
 
 const API_URL = '/api'
 
-const apiClient = axios.create({
+export const apiClient = axios.create({
   baseURL: API_URL,
   headers: {
     'Content-Type': 'application/json',

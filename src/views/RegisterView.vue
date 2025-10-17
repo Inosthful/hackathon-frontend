@@ -62,14 +62,32 @@ const handleRegister = async () => {
 </script>
 
 <template>
-  <div class="register-view min-h-screen flex items-center justify-center bg-gradient-to-br from-purple-50 to-pink-50 dark:from-gray-900 dark:to-gray-800 p-4">
-    <div class="register-card max-w-md w-full">
+  <div class="register-view min-h-screen flex items-center justify-center bg-[#FAF7F2] dark:bg-gray-900 p-4 relative">
+    <!-- Background SVG décoratif -->
+    <div class="absolute top-0 left-0 w-full h-full overflow-hidden z-0">
+      <svg width="100%" height="100%" viewBox="0 0 1440 500" preserveAspectRatio="xMidYMid slice" xmlns="http://www.w3.org/2000/svg">
+        <defs>
+          <radialGradient id="grad1" cx="50%" cy="50%" r="50%">
+            <stop offset="0%" stop-color="rgba(165, 214, 167, 0.3)" />
+            <stop offset="100%" stop-color="rgba(165, 214, 167, 0)" />
+          </radialGradient>
+          <radialGradient id="grad2" cx="50%" cy="50%" r="50%">
+            <stop offset="0%" stop-color="rgba(128, 203, 196, 0.3)" />
+            <stop offset="100%" stop-color="rgba(128, 203, 196, 0)" />
+          </radialGradient>
+        </defs>
+        <rect x="-20%" y="-20%" width="60%" height="60%" fill="url(#grad1)" transform="rotate(-45)" />
+        <rect x="60%" y="40%" width="60%" height="60%" fill="url(#grad2)" transform="rotate(30)" />
+      </svg>
+    </div>
+
+    <div class="register-card max-w-md w-full relative z-10">
       <!-- Card -->
-      <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-2xl p-6 sm:p-8 space-y-4 sm:space-y-6">
+      <div class="bg-white/60 dark:bg-gray-800/60 backdrop-blur-xl rounded-3xl shadow-2xl shadow-gray-200/50 dark:shadow-black/20 p-6 sm:p-8 space-y-4 sm:space-y-6">
         <!-- Header -->
         <div class="text-center space-y-1 sm:space-y-2">
-          <h1 class="text-2xl sm:text-3xl lg:text-4xl font-bold bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent">
-            MoodFlow+
+          <h1 class="text-2xl sm:text-3xl lg:text-4xl font-extrabold text-gray-800 dark:text-white tracking-tighter">
+            Cultivez votre <span class="bg-gradient-to-r from-[#A5D6A7] to-[#80CBC4] bg-clip-text text-transparent">Bien-être</span>
           </h1>
           <p class="text-sm sm:text-base text-gray-600 dark:text-gray-400">
             Crée ton compte pour commencer
@@ -113,7 +131,7 @@ const handleRegister = async () => {
                 placeholder="Doe"
                 class="w-full px-3 sm:px-4 py-2 sm:py-3 text-sm sm:text-base border-2 border-gray-300 dark:border-gray-600 rounded-lg
                        bg-white dark:bg-gray-700 text-gray-800 dark:text-gray-200
-                       focus:ring-2 focus:ring-purple-500 focus:border-transparent
+                       focus:ring-2 focus:ring-[#80CBC4] focus:border-transparent
                        transition-all duration-200"
               />
             </div>
@@ -131,7 +149,7 @@ const handleRegister = async () => {
                 placeholder="John"
                 class="w-full px-3 sm:px-4 py-2 sm:py-3 text-sm sm:text-base border-2 border-gray-300 dark:border-gray-600 rounded-lg
                        bg-white dark:bg-gray-700 text-gray-800 dark:text-gray-200
-                       focus:ring-2 focus:ring-purple-500 focus:border-transparent
+                       focus:ring-2 focus:ring-[#80CBC4] focus:border-transparent
                        transition-all duration-200"
               />
             </div>
@@ -149,7 +167,7 @@ const handleRegister = async () => {
                 placeholder="ton.email@exemple.com"
                 class="w-full px-3 sm:px-4 py-2 sm:py-3 text-sm sm:text-base border-2 border-gray-300 dark:border-gray-600 rounded-lg
                        bg-white dark:bg-gray-700 text-gray-800 dark:text-gray-200
-                       focus:ring-2 focus:ring-purple-500 focus:border-transparent
+                       focus:ring-2 focus:ring-[#80CBC4] focus:border-transparent
                        transition-all duration-200"
               />
             </div>
@@ -166,7 +184,7 @@ const handleRegister = async () => {
                 required
                 class="w-full px-3 sm:px-4 py-2 sm:py-3 text-sm sm:text-base border-2 border-gray-300 dark:border-gray-600 rounded-lg
                        bg-white dark:bg-gray-700 text-gray-800 dark:text-gray-200
-                       focus:ring-2 focus:ring-purple-500 focus:border-transparent
+                       focus:ring-2 focus:ring-[#80CBC4] focus:border-transparent
                        transition-all duration-200"
               />
             </div>
@@ -188,7 +206,7 @@ const handleRegister = async () => {
                 placeholder="••••••••"
                 class="w-full px-3 sm:px-4 py-2 sm:py-3 text-sm sm:text-base border-2 border-gray-300 dark:border-gray-600 rounded-lg
                        bg-white dark:bg-gray-700 text-gray-800 dark:text-gray-200
-                       focus:ring-2 focus:ring-purple-500 focus:border-transparent
+                       focus:ring-2 focus:ring-[#80CBC4] focus:border-transparent
                        transition-all duration-200"
               />
               <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">
@@ -210,7 +228,7 @@ const handleRegister = async () => {
                 placeholder="••••••••"
                 class="w-full px-3 sm:px-4 py-2 sm:py-3 text-sm sm:text-base border-2 border-gray-300 dark:border-gray-600 rounded-lg
                        bg-white dark:bg-gray-700 text-gray-800 dark:text-gray-200
-                       focus:ring-2 focus:ring-purple-500 focus:border-transparent
+                       focus:ring-2 focus:ring-[#80CBC4] focus:border-transparent
                        transition-all duration-200"
               />
             </div>
@@ -229,7 +247,7 @@ const handleRegister = async () => {
             <button
               type="submit"
               :disabled="loading"
-              class="py-2 sm:py-3 px-4 sm:px-6 text-sm sm:text-base rounded-lg bg-gradient-to-r from-purple-600 to-pink-600
+              class="py-2 sm:py-3 px-4 sm:px-6 text-sm sm:text-base rounded-lg bg-gradient-to-r from-[#A5D6A7] to-[#80CBC4]
                      text-white font-semibold shadow-lg hover:shadow-xl
                      transform hover:scale-105 transition-all duration-200
                      disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none"
@@ -245,7 +263,7 @@ const handleRegister = async () => {
             Déjà un compte ?
             <router-link
               to="/login"
-              class="text-purple-600 dark:text-purple-400 font-semibold hover:underline"
+              class="bg-gradient-to-r from-[#A5D6A7] to-[#80CBC4] bg-clip-text text-transparent font-semibold hover:underline"
             >
               Se connecter
             </router-link>

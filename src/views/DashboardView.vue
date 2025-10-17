@@ -1,28 +1,39 @@
 <script setup lang="ts">
-import { useMoodData } from "@/composables/useMoodData";
-import type { MoodType } from "@/types/mood";
-import { computed, onMounted, ref } from "vue";
-import { useRouter, useRoute } from "vue-router"; // Added
 import { useAuth } from "@/composables/useAuth"; // Added
+import { useMoodData } from "@/composables/useMoodData";
+import type { MoodEntry, MoodType } from "@/types/mood";
+import { computed, onMounted, ref } from "vue";
+import { useRoute, useRouter } from "vue-router"; // Added
 import MoodChart from "../components/MoodChart.vue";
-import MoodSelector from "../components/MoodSelector.vue";
 import MoodPopup from "../components/MoodPopup.vue";
+import MoodSelector from "../components/MoodSelector.vue";
 import StreakCounter from '../components/StreakCounter.vue';
 
-import WeekView from "../components/WeekView.vue";
 import MonthView from "../components/MonthView.vue";
+import WeekView from "../components/WeekView.vue";
 
 import WeekSelector from "../components/WeekSelector.vue";
 
 const router = useRouter(); // Added
 const route = useRoute(); // Added
 
-const { loading, error, fetchMoodEntries, saveMood, getWeekMoods, stats, moodEntries, getMonthMoods, hasTodayMood } =
-  useMoodData();
+const {
+  loading,
+  error,
+  fetchMoodEntries,
+  saveMood,
+  deleteMood,
+  getWeekMoods,
+  stats,
+  moodEntries,
+  getMonthMoods,
+  hasTodayMood,
+  cleanupDuplicates,
+} = useMoodData();
 
 const { fetchUser, user } = useAuth(); // Added
 
-const emailChangedSuccessMessage = ref(''); // Added
+const emailChangedSuccessMessage = ref(""); // Added
 
 const toISODateString = (date: Date) => {
   const year = date.getFullYear();
@@ -31,38 +42,44 @@ const toISODateString = (date: Date) => {
   return `${year}-${month}-${day}`;
 };
 
-const toUTCISODateString = (date: Date) => {
-  const year = date.getUTCFullYear();
-  const month = (date.getUTCMonth() + 1).toString().padStart(2, "0");
-  const day = date.getUTCDate().toString().padStart(2, "0");
-  return `${year}-${month}-${day}`;
-};
-
-const selectedDate = ref<string>(toUTCISODateString(new Date()));
-const selectedMood = ref<MoodType | undefined>();
-const showNote = ref(false);
-const moodNote = ref("");
+const selectedDate = ref<string>(toISODateString(new Date()));
+const selectedMood = ref<MoodEntry | undefined>();
 const showSuccess = ref(false);
+const successMessage = ref("Humeur enregistrée avec succès !");
 const showMoodPopup = ref(false);
-const viewMode = ref<'week' | 'month'>('week');
+const viewMode = ref<"week" | "month">("week");
 
-const selectedMoodTime = computed(() => {
-  if (!selectedMood.value || !selectedMood.value.beginAt) return null;
-  return new Date(selectedMood.value.beginAt).toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' });
-});
+const selectedMoodType = computed(() => selectedMood.value?.mood);
 
 const weekDays = computed(() => getWeekMoods());
 const monthDays = computed(() => getMonthMoods());
 
 const currentDayMood = computed(() => {
-  return weekDays.value.find((day) => day.date === selectedDate.value)?.mood;
+  // Chercher directement dans moodEntries pour que ça fonctionne dans les deux vues
+  const targetDate = selectedDate.value.substring(0, 10);
+  return moodEntries.value.find((entry) => {
+    const entryDate = (entry.date || "").substring(0, 10);
+    return entryDate === targetDate;
+  });
+});
+
+const isSameMood = computed(() => {
+  if (!currentDayMood.value || !selectedMood.value) return false;
+  return currentDayMood.value.mood === selectedMood.value.mood;
 });
 
 onMounted(async () => {
   await fetchMoodEntries();
+
+  // Nettoyer automatiquement les doublons au chargement
+  const duplicatesCount = await cleanupDuplicates();
+  if (duplicatesCount > 0) {
+    // Recharger après le nettoyage
+    await fetchMoodEntries();
+  }
+
   if (currentDayMood.value) {
-    selectedMood.value = currentDayMood.value.mood;
-    moodNote.value = currentDayMood.value.note || "";
+    selectedMood.value = currentDayMood.value;
   }
 
   if (!hasTodayMood()) {
@@ -71,63 +88,39 @@ onMounted(async () => {
 });
 
 const handleMoodSelect = (mood: MoodType) => {
-  selectedMood.value = mood;
-  showNote.value = true;
+  selectedMood.value = {
+    date: selectedDate.value,
+    mood: mood,
+  };
 };
 
 const handleDateSelect = (date: string) => {
-  selectedDate.value = toUTCISODateString(new Date(date));
-  const dayMood = weekDays.value.find((day) => day.date === selectedDate.value)?.mood;
-  // On réinitialise toujours pour forcer une sélection manuelle
-  selectedMood.value = dayMood?.mood;
-  moodNote.value = dayMood?.note || "";
-  showNote.value = !!dayMood; // Afficher la note si un mood existe
+  selectedDate.value = toISODateString(new Date(date));
+  const dayMood = weekDays.value.find(
+    (day) => day.date === selectedDate.value
+  )?.mood;
+  selectedMood.value = dayMood;
 };
 
 const saveMoodEntry = async () => {
   if (!selectedMood.value) return;
 
+  const isUpdate = !!currentDayMood.value;
+
+  console.log("DashboardView - Date sélectionnée:", selectedDate.value);
+  console.log("DashboardView - Humeur actuelle du jour:", currentDayMood.value);
+  console.log("DashboardView - Humeur à sauvegarder:", selectedMood.value);
+
   try {
-    await saveMood({
+    const savedMood = await saveMood({
       date: selectedDate.value,
-      mood: selectedMood.value,
-      note: moodNote.value || undefined,
-      beginAt: new Date().toISOString(), // Ajout de l'heure exacte
+      mood: selectedMood.value.mood,
+      beginAt: new Date().toISOString(),
     });
 
-    showSuccess.value = true;
-    setTimeout(() => {
-      showSuccess.value = false;
-    }, 3000);
-
-    await fetchMoodEntries();
-  } catch (e) {
-    console.error("Erreur lors de l'enregistrement:", e);
-  }
-};
-
-const cancelEdit = () => {
-  showNote.value = false;
-  selectedMood.value = currentDayMood.value?.mood;
-  moodNote.value = currentDayMood.value?.note || "";
-};
-
-const handlePopupClose = () => {
-  showMoodPopup.value = false;
-};
-
-const handlePopupSave = async (data: { mood: MoodType; note?: string }) => {
-  try {
-    await saveMood({
-      date: toISODateString(new Date()),
-      mood: data.mood,
-      note: data.note,
-    });
-
-    // Fermer la popup
-    showMoodPopup.value = false;
-
-    // Afficher un message de succès
+    successMessage.value = isUpdate
+      ? "Humeur modifiée avec succès !"
+      : "Humeur enregistrée avec succès !";
     showSuccess.value = true;
     setTimeout(() => {
       showSuccess.value = false;
@@ -136,20 +129,135 @@ const handlePopupSave = async (data: { mood: MoodType; note?: string }) => {
     // Recharger les données
     await fetchMoodEntries();
 
-    // Mettre à jour la sélection pour aujourd'hui
+    // Mettre à jour selectedMood avec la nouvelle valeur sauvegardée
+    selectedMood.value = savedMood;
+    console.log(
+      "DashboardView - Après sauvegarde, selectedMood:",
+      selectedMood.value
+    );
+    console.log(
+      "DashboardView - Après sauvegarde, currentDayMood:",
+      currentDayMood.value
+    );
+  } catch (e) {
+    console.error("Erreur lors de l'enregistrement:", e);
+  }
+};
+
+const handlePopupClose = () => {
+  showMoodPopup.value = false;
+};
+
+const handlePopupSave = async (data: { mood: MoodType }) => {
+  try {
+    const savedMood = await saveMood({
+      date: toISODateString(new Date()),
+      mood: data.mood,
+      beginAt: new Date().toISOString(),
+    });
+
+    // Fermer la popup
+    showMoodPopup.value = false;
+
+    // Afficher un message de succès
+    successMessage.value = "Humeur enregistrée avec succès !";
+    showSuccess.value = true;
+    setTimeout(() => {
+      showSuccess.value = false;
+    }, 3000);
+
+    // Recharger les données
+    await fetchMoodEntries();
+
+    // Mettre à jour la sélection pour aujourd'hui avec l'humeur sauvegardée
     selectedDate.value = toISODateString(new Date());
-    selectedMood.value = data.mood;
-    moodNote.value = data.note || "";
+    selectedMood.value = savedMood;
+
+    console.log(
+      "DashboardView - Après sauvegarde popup, selectedMood:",
+      selectedMood.value
+    );
   } catch (e) {
     console.error("Erreur lors de l'enregistrement depuis la popup:", e);
+  }
+};
+
+const handleDeleteMood = async () => {
+  if (!currentDayMood.value || !currentDayMood.value.id) return;
+
+  if (confirm("Êtes-vous sûr de vouloir supprimer cette humeur ?")) {
+    try {
+      console.log(
+        "DashboardView - Suppression de l'humeur ID:",
+        currentDayMood.value.id
+      );
+      await deleteMood(currentDayMood.value.id);
+
+      // IMPORTANT: Forcer la mise à jour en réinitialisant complètement
+      selectedMood.value = undefined;
+
+      successMessage.value = "Humeur supprimée avec succès !";
+      showSuccess.value = true;
+      setTimeout(() => {
+        showSuccess.value = false;
+      }, 3000);
+
+      // Recharger les données
+      await fetchMoodEntries();
+
+      // Forcer la mise à jour de l'affichage
+      console.log(
+        "DashboardView - Après suppression, currentDayMood:",
+        currentDayMood.value
+      );
+    } catch (e) {
+      console.error("Erreur lors de la suppression:", e);
+    }
   }
 };
 </script>
 
 <template>
   <div
-    class="dashboard min-h-screen bg-gradient-to-br from-purple-50 to-pink-50 dark:from-gray-900 dark:to-gray-800 transition-colors duration-300"
+    class="dashboard min-h-screen bg-[#FAF7F2] dark:bg-gray-900 transition-colors duration-300 relative"
   >
+    <!-- Background SVG décoratif -->
+    <div class="absolute top-0 left-0 w-full h-full overflow-hidden z-0">
+      <svg
+        width="100%"
+        height="100%"
+        viewBox="0 0 1440 500"
+        preserveAspectRatio="xMidYMid slice"
+        xmlns="http://www.w3.org/2000/svg"
+      >
+        <defs>
+          <radialGradient id="grad1" cx="50%" cy="50%" r="50%">
+            <stop offset="0%" stop-color="rgba(165, 214, 167, 0.3)" />
+            <stop offset="100%" stop-color="rgba(165, 214, 167, 0)" />
+          </radialGradient>
+          <radialGradient id="grad2" cx="50%" cy="50%" r="50%">
+            <stop offset="0%" stop-color="rgba(128, 203, 196, 0.3)" />
+            <stop offset="100%" stop-color="rgba(128, 203, 196, 0)" />
+          </radialGradient>
+        </defs>
+        <rect
+          x="-20%"
+          y="-20%"
+          width="60%"
+          height="60%"
+          fill="url(#grad1)"
+          transform="rotate(-45)"
+        />
+        <rect
+          x="60%"
+          y="40%"
+          width="60%"
+          height="60%"
+          fill="url(#grad2)"
+          transform="rotate(30)"
+        />
+      </svg>
+    </div>
     <!-- Popup d'humeur quotidienne -->
     <MoodPopup
       :show="showMoodPopup"
@@ -159,16 +267,19 @@ const handlePopupSave = async (data: { mood: MoodType; note?: string }) => {
     />
 
     <div
-      class="max-w-7xl mx-auto px-4 py-4 sm:py-6 lg:py-8 space-y-4 sm:space-y-6 lg:space-y-8"
+      class="relative z-10 max-w-7xl mx-auto px-4 py-4 sm:py-6 lg:py-8 space-y-4 sm:space-y-6 lg:space-y-8"
     >
       <header class="text-center space-y-1 sm:space-y-2 fade-in">
         <h1
-          class="text-3xl sm:text-4xl lg:text-5xl font-bold bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent"
+          class="text-3xl sm:text-4xl lg:text-5xl font-extrabold text-gray-800 dark:text-white tracking-tighter"
         >
-          MoodFlow+
+          <span
+            class="bg-gradient-to-r from-[#A5D6A7] to-[#80CBC4] bg-clip-text text-transparent"
+            >Moodflow+</span
+          >
         </h1>
         <p class="text-gray-600 dark:text-gray-400 text-base sm:text-lg">
-          Ton journal d'humeur intelligent
+          Suivez vos émotions et comprenez-vous mieux
         </p>
         <StreakCounter v-if="user" :streak="user.joursConsecutifs" />
       </header>
@@ -178,7 +289,7 @@ const handlePopupSave = async (data: { mood: MoodType; note?: string }) => {
           v-if="showSuccess"
           class="bg-green-500 text-white p-3 sm:p-4 rounded-lg shadow-lg text-center font-medium text-sm sm:text-base"
         >
-          ✅ Humeur enregistrée avec succès !
+          ✅ {{ successMessage }}
         </div>
       </Transition>
       <div
@@ -194,15 +305,20 @@ const handlePopupSave = async (data: { mood: MoodType; note?: string }) => {
       </section>
 
       <!-- Toggle Vue Semaine / Mois -->
-      <section class="fade-in flex justify-center" style="animation-delay: 0.15s">
-        <div class="inline-flex rounded-lg border-2 border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 p-1 shadow-md">
+      <section
+        class="fade-in flex justify-center"
+        style="animation-delay: 0.15s"
+      >
+        <div
+          class="inline-flex rounded-lg border-2 border-gray-300/50 dark:border-gray-600/50 bg-white/60 dark:bg-gray-800/60 backdrop-blur-xl p-1 shadow-xl"
+        >
           <button
             @click="viewMode = 'week'"
             :class="[
               'px-4 sm:px-6 py-2 rounded-lg text-sm sm:text-base font-medium transition-all duration-200',
               viewMode === 'week'
-                ? 'bg-gradient-to-r from-purple-600 to-pink-600 text-white shadow-lg'
-                : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700'
+                ? 'bg-gradient-to-r from-[#A5D6A7] to-[#80CBC4] text-white shadow-lg'
+                : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100/60 dark:hover:bg-gray-700/60',
             ]"
           >
             📅 Semaine
@@ -212,8 +328,8 @@ const handlePopupSave = async (data: { mood: MoodType; note?: string }) => {
             :class="[
               'px-4 sm:px-6 py-2 rounded-lg text-sm sm:text-base font-medium transition-all duration-200',
               viewMode === 'month'
-                ? 'bg-gradient-to-r from-purple-600 to-pink-600 text-white shadow-lg'
-                : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700'
+                ? 'bg-gradient-to-r from-[#A5D6A7] to-[#80CBC4] text-white shadow-lg'
+                : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100/60 dark:hover:bg-gray-700/60',
             ]"
           >
             🗓️ Mois
@@ -222,7 +338,11 @@ const handlePopupSave = async (data: { mood: MoodType; note?: string }) => {
       </section>
 
       <!-- Vue de la semaine -->
-      <section v-if="viewMode === 'week'" class="fade-in" style="animation-delay: 0.2s">
+      <section
+        v-if="viewMode === 'week'"
+        class="fade-in"
+        style="animation-delay: 0.2s"
+      >
         <WeekView
           :weekDays="weekDays"
           :selectedDate="selectedDate"
@@ -231,7 +351,11 @@ const handlePopupSave = async (data: { mood: MoodType; note?: string }) => {
       </section>
 
       <!-- Vue du mois -->
-      <section v-if="viewMode === 'month'" class="fade-in" style="animation-delay: 0.2s">
+      <section
+        v-if="viewMode === 'month'"
+        class="fade-in"
+        style="animation-delay: 0.2s"
+      >
         <MonthView
           :monthDays="monthDays"
           :selectedDate="selectedDate"
@@ -242,49 +366,31 @@ const handlePopupSave = async (data: { mood: MoodType; note?: string }) => {
       <!-- Sélecteur d'humeur -->
       <section class="fade-in" style="animation-delay: 0.3s">
         <div
-          class="bg-white dark:bg-gray-800 p-4 sm:p-6 lg:p-8 rounded-2xl shadow-xl"
+          class="bg-white/70 dark:bg-gray-800/70 backdrop-blur-xl p-4 sm:p-6 lg:p-8 rounded-3xl shadow-[0_8px_30px_rgb(0,0,0,0.12)]"
         >
           <MoodSelector
-            :selectedMood="selectedMood"
+            :selectedMood="selectedMoodType"
             :disabled="loading"
             @select="handleMoodSelect"
           />
 
-          <Transition name="expand">
-            <div v-if="showNote" class="mt-4 sm:mt-6 space-y-3 sm:space-y-4">
-              <div>
-                <label
-                  for="mood-note"
-                  class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2"
-                >
-                  Ajoute une note (optionnel)
-                </label>
-                <textarea
-                  id="mood-note"
-                  v-model="moodNote"
-                  rows="3"
-                  class="w-full p-2 sm:p-3 border-2 border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-800 dark:text-gray-200 text-sm sm:text-base focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all duration-200"
-                  placeholder="Qu'est-ce qui a influencé ton humeur aujourd'hui ?"
-                ></textarea>
-              </div>
-
-              <div class="flex flex-col sm:flex-row gap-2 sm:gap-4 justify-end">
-                <button
-                  @click="cancelEdit"
-                  class="px-4 sm:px-6 py-2 text-sm sm:text-base rounded-lg border-2 border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 font-medium hover:bg-gray-100 dark:hover:bg-gray-700 transition-all duration-200"
-                >
-                  Annuler
-                </button>
-                <button
-                  @click="saveMoodEntry"
-                  :disabled="!selectedMood || loading"
-                  class="px-4 sm:px-6 py-2 text-sm sm:text-base rounded-lg bg-gradient-to-r from-purple-600 to-pink-600 text-white font-medium shadow-lg hover:shadow-xl transform hover:scale-105 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none"
-                >
-                  {{ loading ? "Enregistrement..." : "Enregistrer" }}
-                </button>
-              </div>
-            </div>
-          </Transition>
+          <div class="mt-6 flex justify-end gap-3">
+            <button
+              v-if="currentDayMood"
+              @click="handleDeleteMood"
+              :disabled="loading"
+              class="px-6 py-3 rounded-lg bg-red-500 text-white font-medium shadow-lg hover:shadow-xl hover:bg-red-600 transform hover:scale-105 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none"
+            >
+              {{ loading ? "Suppression..." : "Supprimer" }}
+            </button>
+            <button
+              @click="saveMoodEntry"
+              :disabled="!selectedMood || loading || isSameMood"
+              class="px-6 py-3 rounded-lg bg-gradient-to-r from-[#A5D6A7] to-[#80CBC4] text-white font-medium shadow-lg hover:shadow-xl transform hover:scale-105 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none"
+            >
+              {{ loading ? "Enregistrement..." : "Enregistrer" }}
+            </button>
+          </div>
         </div>
       </section>
 
@@ -303,7 +409,7 @@ const handlePopupSave = async (data: { mood: MoodType; note?: string }) => {
 
       <section
         v-else
-        class="text-center p-6 sm:p-8 lg:p-12 bg-white dark:bg-gray-800 rounded-2xl shadow-lg fade-in"
+        class="text-center p-6 sm:p-8 lg:p-12 bg-white/70 dark:bg-gray-800/70 backdrop-blur-xl rounded-3xl shadow-[0_8px_30px_rgb(0,0,0,0.12)] fade-in"
         style="animation-delay: 0.3s"
       >
         <div class="text-4xl sm:text-5xl lg:text-6xl mb-3 sm:mb-4">📝</div>
@@ -318,7 +424,7 @@ const handlePopupSave = async (data: { mood: MoodType; note?: string }) => {
         class="text-center py-4 sm:py-6 lg:py-8 text-gray-600 dark:text-gray-400"
       >
         <p class="text-xs sm:text-sm">
-          MoodFlow+ - Créé avec ❤️ pour le Hackathon Ynov 2025
+          Conçu avec soin pour votre épanouissement
         </p>
       </footer>
     </div>
@@ -350,20 +456,6 @@ const handlePopupSave = async (data: { mood: MoodType; note?: string }) => {
 .slide-fade-enter-from,
 .slide-fade-leave-to {
   transform: translateY(-20px);
-  opacity: 0;
-}
-
-/* Transition pour l'expansion de la zone de note */
-.expand-enter-active,
-.expand-leave-active {
-  transition: all 0.3s ease-out;
-  max-height: 300px;
-  overflow: hidden;
-}
-
-.expand-enter-from,
-.expand-leave-to {
-  max-height: 0;
   opacity: 0;
 }
 </style>

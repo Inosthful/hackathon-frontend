@@ -1,17 +1,17 @@
 <script setup lang="ts">
-import { computed } from 'vue'
-import VChart from 'vue-echarts'
-import { use } from 'echarts/core'
-import { CanvasRenderer } from 'echarts/renderers'
-import { PieChart, BarChart } from 'echarts/charts'
+import type { MoodStats } from "@/types/mood";
+import { MOOD_COLORS, MOOD_EMOJIS, MOOD_LABELS } from "@/types/mood";
+import { BarChart, PieChart } from "echarts/charts";
 import {
+  GridComponent,
+  LegendComponent,
   TitleComponent,
   TooltipComponent,
-  LegendComponent,
-  GridComponent,
-} from 'echarts/components'
-import type { MoodStats } from '@/types/mood'
-import { MOOD_COLORS, MOOD_LABELS, MOOD_EMOJIS } from '@/types/mood'
+} from "echarts/components";
+import { use } from "echarts/core";
+import { CanvasRenderer } from "echarts/renderers";
+import { computed } from "vue";
+import VChart from "vue-echarts";
 
 // Enregistrer les composants ECharts nécessaires
 use([
@@ -22,114 +22,119 @@ use([
   TooltipComponent,
   LegendComponent,
   GridComponent,
-])
+]);
 
 interface Props {
-  stats: MoodStats
+  stats: MoodStats;
 }
 
-const props = defineProps<Props>()
+const props = defineProps<Props>();
 
 // Options pour le graphique en donut (camembert)
 const doughnutOptions = computed(() => {
-  const data = Object.entries(props.stats.moodDistribution).map(([mood, count]) => ({
-    name: MOOD_LABELS[mood as keyof typeof MOOD_LABELS],
-    value: count,
-    itemStyle: {
-      color: MOOD_COLORS[mood as keyof typeof MOOD_COLORS],
-    },
-  }))
+  const data = Object.entries(props.stats.moodDistribution).map(
+    ([mood, count]) => ({
+      name: MOOD_LABELS[mood as keyof typeof MOOD_LABELS],
+      value: count,
+      itemStyle: {
+        color: MOOD_COLORS[mood as keyof typeof MOOD_COLORS],
+      },
+    })
+  );
 
   return {
     tooltip: {
-      trigger: 'item',
-      formatter: '{b}: {c} ({d}%)',
-      backgroundColor: 'rgba(0, 0, 0, 0.8)',
-      borderColor: '#777',
+      trigger: "item",
+      formatter: "{b}: {c} ({d}%)",
+      backgroundColor: "rgba(0, 0, 0, 0.8)",
+      borderColor: "#777",
       borderWidth: 1,
       textStyle: {
-        color: '#fff',
+        color: "#fff",
         fontSize: 14,
       },
     },
     legend: {
-      orient: 'horizontal',
-      bottom: '0%',
+      orient: "horizontal",
+      bottom: "0%",
       textStyle: {
         fontSize: 12,
       },
     },
     series: [
       {
-        name: 'Humeurs',
-        type: 'pie',
-        radius: ['40%', '70%'],
+        name: "Humeurs",
+        type: "pie",
+        radius: ["40%", "70%"],
         avoidLabelOverlap: false,
         itemStyle: {
           borderRadius: 10,
-          borderColor: '#fff',
+          borderColor: "#fff",
           borderWidth: 2,
         },
         label: {
           show: false,
-          position: 'center',
+          position: "center",
         },
         emphasis: {
           label: {
             show: true,
             fontSize: 20,
-            fontWeight: 'bold',
+            fontWeight: "bold",
           },
           itemStyle: {
             shadowBlur: 10,
             shadowOffsetX: 0,
-            shadowColor: 'rgba(0, 0, 0, 0.5)',
+            shadowColor: "rgba(0, 0, 0, 0.5)",
           },
         },
         labelLine: {
           show: false,
         },
         data,
-        animationType: 'scale',
+        animationType: "scale",
         animationDelay: (idx: number) => idx * 100,
       },
     ],
-  }
-})
+  };
+});
 
 // Options pour le graphique en barres
 const barOptions = computed(() => {
   const categories = Object.keys(props.stats.moodDistribution).map(
-    mood => MOOD_EMOJIS[mood as keyof typeof MOOD_EMOJIS] + ' ' + MOOD_LABELS[mood as keyof typeof MOOD_LABELS]
-  )
-  const values = Object.values(props.stats.moodDistribution)
+    (mood) =>
+      MOOD_EMOJIS[mood as keyof typeof MOOD_EMOJIS] +
+      " " +
+      MOOD_LABELS[mood as keyof typeof MOOD_LABELS]
+  );
+  const values = Object.values(props.stats.moodDistribution);
   const colors = Object.keys(props.stats.moodDistribution).map(
-    mood => MOOD_COLORS[mood as keyof typeof MOOD_COLORS]
-  )
+    (mood) => MOOD_COLORS[mood as keyof typeof MOOD_COLORS]
+  );
 
   return {
     tooltip: {
-      trigger: 'axis',
+      trigger: "axis",
       axisPointer: {
-        type: 'shadow',
+        type: "shadow",
       },
-      backgroundColor: 'rgba(0, 0, 0, 0.8)',
-      borderColor: '#777',
+      backgroundColor: "rgba(0, 0, 0, 0.8)",
+      borderColor: "#777",
       borderWidth: 1,
       textStyle: {
-        color: '#fff',
+        color: "#fff",
         fontSize: 14,
       },
     },
     grid: {
-      left: '3%',
-      right: '4%',
-      bottom: '3%',
-      top: '3%',
+      left: "3%",
+      right: "4%",
+      bottom: "3%",
+      top: "3%",
       containLabel: true,
     },
     xAxis: {
-      type: 'category',
+      type: "category",
       data: categories,
       axisLabel: {
         fontSize: 11,
@@ -138,7 +143,7 @@ const barOptions = computed(() => {
       },
     },
     yAxis: {
-      type: 'value',
+      type: "value",
       minInterval: 1,
       axisLabel: {
         fontSize: 12,
@@ -146,8 +151,8 @@ const barOptions = computed(() => {
     },
     series: [
       {
-        name: 'Nombre',
-        type: 'bar',
+        name: "Nombre",
+        type: "bar",
         data: values.map((value, index) => ({
           value,
           itemStyle: {
@@ -155,37 +160,38 @@ const barOptions = computed(() => {
             borderRadius: [8, 8, 0, 0],
           },
         })),
-        barWidth: '60%',
+        barWidth: "60%",
         animationDelay: (idx: number) => idx * 100,
         emphasis: {
           itemStyle: {
             shadowBlur: 10,
             shadowOffsetX: 0,
-            shadowColor: 'rgba(0, 0, 0, 0.5)',
+            shadowColor: "rgba(0, 0, 0, 0.5)",
           },
         },
       },
     ],
-  }
-})
+  };
+});
 
 const trendIcon = computed(() => {
-  if (props.stats.weekTrend === 'up') return '📈'
-  if (props.stats.weekTrend === 'down') return '📉'
-  return '➡️'
-})
+  if (props.stats.weekTrend === "up") return "📈";
+  if (props.stats.weekTrend === "down") return "📉";
+  return "➡️";
+});
 
 const trendText = computed(() => {
-  if (props.stats.weekTrend === 'up') return 'En hausse'
-  if (props.stats.weekTrend === 'down') return 'En baisse'
-  return 'Stable'
-})
+  if (props.stats.weekTrend === "up") return "En hausse";
+  if (props.stats.weekTrend === "down") return "En baisse";
+  return "Stable";
+});
 
 const trendColor = computed(() => {
-  if (props.stats.weekTrend === 'up') return 'text-green-600 dark:text-green-400'
-  if (props.stats.weekTrend === 'down') return 'text-red-600 dark:text-red-400'
-  return 'text-blue-600 dark:text-blue-400'
-})
+  if (props.stats.weekTrend === "up")
+    return "text-green-600 dark:text-green-400";
+  if (props.stats.weekTrend === "down") return "text-red-600 dark:text-red-400";
+  return "text-blue-600 dark:text-blue-400";
+});
 </script>
 
 <template>
@@ -193,33 +199,37 @@ const trendColor = computed(() => {
     <!-- Statistiques générales -->
     <div class="stats-grid grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-4">
       <div
-        class="stat-card bg-gradient-to-br from-purple-50 to-pink-50 dark:from-purple-900/20 dark:to-pink-900/20 p-4 sm:p-6 rounded-xl shadow-lg border border-purple-200 dark:border-purple-800"
+        class="stat-card bg-gradient-to-br from-[#A5D6A7]/20 to-[#80CBC4]/20 dark:from-[#A5D6A7]/10 dark:to-[#80CBC4]/10 backdrop-blur-sm p-4 sm:p-6 rounded-2xl shadow-xl border border-[#A5D6A7]/30 dark:border-[#A5D6A7]/20"
       >
         <div class="text-3xl sm:text-4xl mb-2">📊</div>
         <div
-          class="text-2xl sm:text-3xl font-bold bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent"
+          class="text-2xl sm:text-3xl font-bold bg-gradient-to-r from-[#A5D6A7] to-[#80CBC4] bg-clip-text text-transparent"
         >
           {{ stats.totalEntries }}
         </div>
-        <div class="text-xs sm:text-sm text-gray-600 dark:text-gray-400 font-medium">
+        <div
+          class="text-xs sm:text-sm text-gray-600 dark:text-gray-400 font-medium"
+        >
           Entrées totales
         </div>
       </div>
 
       <div
-        class="stat-card bg-gradient-to-br from-blue-50 to-cyan-50 dark:from-blue-900/20 dark:to-cyan-900/20 p-4 sm:p-6 rounded-xl shadow-lg border border-blue-200 dark:border-blue-800"
+        class="stat-card bg-gradient-to-br from-[#A5D6A7]/20 to-[#80CBC4]/20 dark:from-[#A5D6A7]/10 dark:to-[#80CBC4]/10 backdrop-blur-sm p-4 sm:p-6 rounded-2xl shadow-xl border border-[#80CBC4]/30 dark:border-[#80CBC4]/20"
       >
         <div class="text-3xl sm:text-4xl mb-2">{{ trendIcon }}</div>
         <div class="text-2xl sm:text-3xl font-bold" :class="trendColor">
           {{ trendText }}
         </div>
-        <div class="text-xs sm:text-sm text-gray-600 dark:text-gray-400 font-medium">
+        <div
+          class="text-xs sm:text-sm text-gray-600 dark:text-gray-400 font-medium"
+        >
           Tendance de la semaine
         </div>
       </div>
 
       <div
-        class="stat-card bg-gradient-to-br from-yellow-50 to-orange-50 dark:from-yellow-900/20 dark:to-orange-900/20 p-4 sm:p-6 rounded-xl shadow-lg border border-yellow-200 dark:border-yellow-800"
+        class="stat-card bg-gradient-to-br from-[#A5D6A7]/20 to-[#80CBC4]/20 dark:from-[#A5D6A7]/10 dark:to-[#80CBC4]/10 backdrop-blur-sm p-4 sm:p-6 rounded-2xl shadow-xl border border-[#A5D6A7]/30 dark:border-[#A5D6A7]/20"
       >
         <div class="text-3xl sm:text-4xl mb-2">⭐</div>
         <div
@@ -227,7 +237,9 @@ const trendColor = computed(() => {
         >
           {{ MOOD_LABELS[stats.mostFrequentMood] }}
         </div>
-        <div class="text-xs sm:text-sm text-gray-600 dark:text-gray-400 font-medium">
+        <div
+          class="text-xs sm:text-sm text-gray-600 dark:text-gray-400 font-medium"
+        >
           Humeur dominante
         </div>
       </div>
@@ -236,7 +248,7 @@ const trendColor = computed(() => {
     <!-- Graphiques ECharts -->
     <div class="charts-grid grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6">
       <div
-        class="chart-container bg-white dark:bg-gray-800 p-4 sm:p-6 rounded-xl shadow-lg border border-gray-200 dark:border-gray-700"
+        class="chart-container bg-white/70 dark:bg-gray-800/70 backdrop-blur-xl p-4 sm:p-6 rounded-2xl shadow-[0_6px_25px_rgb(0,0,0,0.1)] border border-gray-200/30 dark:border-gray-700/30"
       >
         <h4
           class="text-base sm:text-lg font-semibold mb-3 sm:mb-4 text-gray-800 dark:text-gray-200"
@@ -251,7 +263,7 @@ const trendColor = computed(() => {
       </div>
 
       <div
-        class="chart-container bg-white dark:bg-gray-800 p-4 sm:p-6 rounded-xl shadow-lg border border-gray-200 dark:border-gray-700"
+        class="chart-container bg-white/70 dark:bg-gray-800/70 backdrop-blur-xl p-4 sm:p-6 rounded-2xl shadow-[0_6px_25px_rgb(0,0,0,0.1)] border border-gray-200/30 dark:border-gray-700/30"
       >
         <h4
           class="text-base sm:text-lg font-semibold mb-3 sm:mb-4 text-gray-800 dark:text-gray-200"

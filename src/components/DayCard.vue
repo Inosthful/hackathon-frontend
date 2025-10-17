@@ -24,15 +24,17 @@ defineProps<Props>()
       'day-card',
       'cursor-pointer transition-all duration-300',
       'p-3 sm:p-4 md:p-5 rounded-3xl text-center',
-      'bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm shadow-lg hover:shadow-2xl',
-      'border-3',
-      isToday && 'border-[#A5D6A7] ring-4 ring-[#A5D6A7]/30',
-      selectedDate === day.date && 'ring-4 ring-[#80CBC4]/50',
-      !isToday && !day.mood && 'border-gray-200 dark:border-gray-700',
+      'bg-white/70 dark:bg-gray-800/70 backdrop-blur-xl shadow-[0_8px_30px_rgb(0,0,0,0.12)] hover:shadow-[0_12px_40px_rgb(0,0,0,0.18)]',
     ]"
     :style="{
-      borderColor: day.mood && !isToday ? MOOD_COLORS[day.mood.mood] : undefined,
-      borderWidth: '3px'
+      border: day.mood
+        ? `3px solid ${MOOD_COLORS[day.mood.mood]}`
+        : isToday
+        ? '3px solid #A5D6A7'
+        : '3px solid transparent',
+      boxShadow: selectedDate === day.date
+        ? `0 0 20px ${day.mood ? MOOD_COLORS[day.mood.mood] : '#A5D6A7'}80`
+        : undefined
     }"
   >
     <div class="text-[0.65rem] sm:text-xs md:text-sm font-bold uppercase text-gray-500 dark:text-gray-400 mb-1 sm:mb-2">

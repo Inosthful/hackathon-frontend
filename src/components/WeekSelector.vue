@@ -69,7 +69,7 @@ const isDateInCurrentWeek = (date: Date) => {
 
 <template>
   <div
-    class="week-selector bg-white dark:bg-gray-800 p-2 sm:p-4 rounded-2xl shadow-xl flex items-center justify-between"
+    class="week-selector bg-white/70 dark:bg-gray-800/70 backdrop-blur-xl p-2 sm:p-4 rounded-3xl shadow-[0_6px_25px_rgb(0,0,0,0.1)] flex items-center justify-between"
   >
     <button
       @click="previousWeek"
@@ -94,7 +94,7 @@ const isDateInCurrentWeek = (date: Date) => {
     <div class="relative">
       <button
         @click="showCalendar = !showCalendar"
-        class="text-base sm:text-lg font-semibold text-gray-800 dark:text-gray-200 hover:text-purple-600 dark:hover:text-purple-400 transition-colors text-center"
+        class="text-base sm:text-lg font-semibold text-gray-800 dark:text-gray-200 hover:bg-gradient-to-r hover:from-[#A5D6A7] hover:to-[#80CBC4] hover:bg-clip-text hover:text-transparent transition-colors text-center"
       >
         {{ weekRange }}
       </button>
@@ -102,7 +102,7 @@ const isDateInCurrentWeek = (date: Date) => {
       <transition name="fade">
         <div
           v-if="showCalendar"
-          class="absolute z-50 mt-2 w-80 bg-gray-50 dark:bg-gray-800 p-6 rounded-2xl shadow-2xl border-2 border-gray-200 dark:border-gray-700 left-1/2 -translate-x-1/2"
+          class="absolute z-50 mt-2 w-80 bg-white/70 dark:bg-gray-800/70 backdrop-blur-xl p-6 rounded-2xl shadow-[0_8px_30px_rgb(0,0,0,0.15)] border-2 border-gray-200/30 dark:border-gray-700/30 left-1/2 -translate-x-1/2"
         >
           <div class="flex items-center justify-between mb-4">
             <h4 class="text-lg font-bold text-gray-900 dark:text-white">
@@ -175,11 +175,11 @@ const isDateInCurrentWeek = (date: Date) => {
               <div v-if="day" :key="index">
                 <button
                   @click="selectDate(day)"
-                  class="w-10 h-10 rounded-full text-sm transition-colors duration-200"
+                  class="w-10 h-10 rounded-full text-sm transition-all duration-200"
                   :class="{
-                    'bg-purple-600 text-white font-bold hover:bg-purple-700':
+                    'bg-gradient-to-r from-[#A5D6A7] to-[#80CBC4] text-white font-bold hover:shadow-lg':
                       isDateInCurrentWeek(day),
-                    'text-gray-800 dark:text-gray-200 hover:bg-gray-200 dark:hover:bg-gray-700':
+                    'text-gray-800 dark:text-gray-200 hover:bg-gray-200/60 dark:hover:bg-gray-700/60':
                       !isDateInCurrentWeek(day),
                   }"
                 >

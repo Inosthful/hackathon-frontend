@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { getRandomQuote } from "@/constants/quotes";
 import type { MoodType } from "@/types/mood";
-import { ref } from "vue";
+import { ref, watch } from "vue";
 import MoodSelector from "./MoodSelector.vue";
 
 interface Props {
@@ -11,40 +11,45 @@ interface Props {
 
 interface Emits {
   (e: "close"): void;
-  (e: "save", data: { mood: MoodType; note?: string }): void;
+  (e: "save", data: { mood: MoodType }): void;
 }
 
 const props = defineProps<Props>();
 const emit = defineEmits<Emits>();
 
 const selectedMood = ref<MoodType | undefined>();
-const moodNote = ref("");
-const showNoteField = ref(false);
 const currentQuote = ref<string>("");
 
+// Réinitialiser l'état quand la popup s'ouvre
+watch(() => props.show, (newValue) => {
+  if (newValue) {
+    // La popup vient de s'ouvrir, on reset tout
+    selectedMood.value = undefined;
+    currentQuote.value = "";
+    console.log('MoodPopup - Réinitialisation à l\'ouverture');
+  }
+});
+
 const handleMoodSelect = (mood: MoodType) => {
+  console.log('MoodPopup - Sélection:', mood);
   selectedMood.value = mood;
-  showNoteField.value = true;
   currentQuote.value = getRandomQuote(mood);
 };
 
 const handleSave = () => {
   if (!selectedMood.value) return;
+  console.log('MoodPopup - Sauvegarde:', selectedMood.value);
   emit("save", {
     mood: selectedMood.value,
-    note: moodNote.value || undefined,
   });
   selectedMood.value = undefined;
-  moodNote.value = "";
-  showNoteField.value = false;
   currentQuote.value = "";
 };
 
 const handleClose = () => {
+  console.log('MoodPopup - Fermeture');
   emit("close");
   selectedMood.value = undefined;
-  moodNote.value = "";
-  showNoteField.value = false;
   currentQuote.value = "";
 };
 </script>
@@ -57,7 +62,7 @@ const handleClose = () => {
       @click.self="handleClose"
     >
       <div
-        class="bg-white/80 dark:bg-gray-800/80 backdrop-blur-lg rounded-3xl shadow-2xl border border-white/30 dark:border-gray-700/30 max-w-2xl w-full max-h-[90vh] overflow-y-auto transform transition-all"
+        class="bg-white/60 dark:bg-gray-800/60 backdrop-blur-xl rounded-3xl shadow-2xl shadow-gray-200/50 dark:shadow-black/20 border border-white/30 dark:border-gray-700/30 max-w-2xl w-full max-h-[90vh] overflow-y-auto transform transition-all"
       >
         <!-- Header -->
         <div
@@ -111,7 +116,7 @@ const handleClose = () => {
           <Transition name="quote-fade">
             <div
               v-if="currentQuote"
-              class="quote-container p-5 sm:p-6 rounded-2xl bg-gradient-to-r from-[#B2E0B4]/30 to-[#8FD9D6]/30 border-l-4 border-[#8FD9D6] dark:from-[#8FD9D6]/10 dark:to-[#B2E0B4]/10"
+              class="quote-container p-5 sm:p-6 rounded-2xl bg-gradient-to-r from-[#A5D6A7]/30 to-[#80CBC4]/30 border-l-4 border-[#80CBC4] dark:from-[#80CBC4]/10 dark:to-[#A5D6A7]/10"
             >
               <div class="flex items-start gap-3">
                 <span class="text-2xl sm:text-3xl">💭</span>
@@ -121,25 +126,6 @@ const handleClose = () => {
                   {{ currentQuote }}
                 </p>
               </div>
-            </div>
-          </Transition>
-
-          <!-- Champ de note -->
-          <Transition name="expand">
-            <div v-if="showNoteField" class="space-y-3">
-              <label
-                for="popup-mood-note"
-                class="block text-sm font-medium text-gray-700 dark:text-gray-300"
-              >
-                Ajoute une note (optionnel)
-              </label>
-              <textarea
-                id="popup-mood-note"
-                v-model="moodNote"
-                rows="3"
-                class="w-full p-3 border-2 border-gray-300/60 dark:border-gray-600/60 rounded-xl bg-white/70 dark:bg-gray-700/70 text-gray-800 dark:text-gray-200 focus:ring-2 focus:ring-[#8FD9D6] focus:border-transparent transition-all duration-200"
-                placeholder="Qu'est-ce qui influence ton humeur aujourd'hui ?"
-              ></textarea>
             </div>
           </Transition>
         </div>
@@ -157,7 +143,7 @@ const handleClose = () => {
           <button
             @click="handleSave"
             :disabled="!selectedMood || loading"
-            class="px-6 py-3 rounded-lg bg-gradient-to-r from-[#B2E0B4] to-[#8FD9D6] text-white font-medium shadow-lg hover:shadow-xl transform hover:scale-105 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none"
+            class="px-6 py-3 rounded-lg bg-gradient-to-r from-[#A5D6A7] to-[#80CBC4] text-white font-medium shadow-lg hover:shadow-xl transform hover:scale-105 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none"
           >
             {{ loading ? "Enregistrement..." : "Enregistrer" }}
           </button>
@@ -210,18 +196,5 @@ const handleClose = () => {
   50% {
     transform: scale(1.02);
   }
-}
-
-/* Expansion du champ de note */
-.expand-enter-active,
-.expand-leave-active {
-  transition: all 0.3s ease-out;
-  max-height: 200px;
-  overflow: hidden;
-}
-.expand-enter-from,
-.expand-leave-to {
-  max-height: 0;
-  opacity: 0;
 }
 </style>

@@ -178,7 +178,7 @@ const handleAccountDelete = async () => {
 </script>
 
 <template>
-  <div class="min-h-screen w-full bg-[#F5F5F5] dark:bg-gray-900 font-sans transition-colors duration-300">
+  <div class="min-h-screen w-full bg-[#FAF7F2] dark:bg-gray-900 font-sans transition-colors duration-300">
     <div class="absolute top-0 left-0 w-full h-full overflow-hidden z-0">
         <svg width="100%" height="100%" viewBox="0 0 1440 500" preserveAspectRatio="xMidYMid slice" xmlns="http://www.w3.org/2000/svg">
             <defs>
@@ -231,20 +231,20 @@ const handleAccountDelete = async () => {
               <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div class="form-group">
                   <label for="prenom" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Prénom</label>
-                  <input type="text" id="prenom" v-model="formData.prenom" placeholder="Votre prénom" class="w-full p-3 border-2 border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-800 dark:text-gray-200 focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all duration-200" />
+                  <input type="text" id="prenom" v-model="formData.prenom" placeholder="Votre prénom" class="w-full p-3 border-2 border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-800 dark:text-gray-200 focus:ring-2 focus:ring-[#80CBC4] focus:border-transparent transition-all duration-200" />
                 </div>
                 <div class="form-group">
                   <label for="nom" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Nom</label>
-                  <input type="text" id="nom" v-model="formData.nom" placeholder="Votre nom" class="w-full p-3 border-2 border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-800 dark:text-gray-200 focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all duration-200" />
+                  <input type="text" id="nom" v-model="formData.nom" placeholder="Votre nom" class="w-full p-3 border-2 border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-800 dark:text-gray-200 focus:ring-2 focus:ring-[#80CBC4] focus:border-transparent transition-all duration-200" />
                 </div>
               </div>
               <div class="form-group">
                 <label for="dateAnniversaire" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Date de naissance</label>
-                <input type="date" id="dateAnniversaire" v-model="formData.dateAnniversaire" class="w-full p-3 border-2 border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-800 dark:text-gray-200 focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all duration-200" />
+                <input type="date" id="dateAnniversaire" v-model="formData.dateAnniversaire" class="w-full p-3 border-2 border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-800 dark:text-gray-200 focus:ring-2 focus:ring-[#80CBC4] focus:border-transparent transition-all duration-200" />
               </div>
 
               <div class="pt-6 flex flex-col-reverse sm:flex-row sm:justify-end sm:items-center gap-4">
-                <button type="submit" :disabled="loading" class="px-4 py-2 text-xs sm:text-sm rounded-lg bg-purple-600 text-white font-medium hover:bg-purple-700 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed">
+                <button type="submit" :disabled="loading" class="px-4 py-2 text-xs sm:text-sm rounded-lg bg-gradient-to-r from-[#A5D6A7] to-[#80CBC4] text-white font-medium hover:shadow-lg transform hover:scale-105 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none">
                   <span v-if="loading">Sauvegarde...</span>
                   <span v-else>Sauvegarder</span>
                 </button>
@@ -257,10 +257,10 @@ const handleAccountDelete = async () => {
             <form @submit.prevent="handleEmailChange" class="space-y-6">
               <div class="form-group">
                 <label for="new-email" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Nouvelle adresse e-mail</label>
-                <input type="email" id="new-email" v-model="newEmail" placeholder="nouvel.email@example.com" class="w-full p-3 border-2 border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-800 dark:text-gray-200 focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all duration-200" />
+                <input type="email" id="new-email" v-model="newEmail" placeholder="nouvel.email@example.com" class="w-full p-3 border-2 border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-800 dark:text-gray-200 focus:ring-2 focus:ring-[#80CBC4] focus:border-transparent transition-all duration-200" />
               </div>
               <div class="pt-6 flex justify-end">
-                <button type="submit" :disabled="emailChangeLoading" class="px-4 py-2 text-xs sm:text-sm rounded-lg bg-purple-600 text-white font-medium hover:bg-purple-700 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed">
+                <button type="submit" :disabled="emailChangeLoading" class="px-4 py-2 text-xs sm:text-sm rounded-lg bg-gradient-to-r from-[#A5D6A7] to-[#80CBC4] text-white font-medium hover:shadow-lg transform hover:scale-105 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none">
                   <span v-if="emailChangeLoading">Envoi...</span>
                   <span v-else>Recevoir l'e-mail de confirmation</span>
                 </button>
@@ -274,15 +274,15 @@ const handleAccountDelete = async () => {
               <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div class="form-group">
                   <label for="current-password" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Ancien mot de passe</label>
-                  <input type="password" id="current-password" v-model="currentPassword" placeholder="••••••••" class="w-full p-3 border-2 border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-800 dark:text-gray-200 focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all duration-200" />
+                  <input type="password" id="current-password" v-model="currentPassword" placeholder="••••••••" class="w-full p-3 border-2 border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-800 dark:text-gray-200 focus:ring-2 focus:ring-[#80CBC4] focus:border-transparent transition-all duration-200" />
                 </div>
                 <div class="form-group">
                   <label for="new-password" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Nouveau mot de passe</label>
-                  <input type="password" id="new-password" v-model="newPassword" placeholder="••••••••" class="w-full p-3 border-2 border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-800 dark:text-gray-200 focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all duration-200" />
+                  <input type="password" id="new-password" v-model="newPassword" placeholder="••••••••" class="w-full p-3 border-2 border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-800 dark:text-gray-200 focus:ring-2 focus:ring-[#80CBC4] focus:border-transparent transition-all duration-200" />
                 </div>
               </div>
               <div class="pt-6 flex justify-end">
-                <button type="submit" :disabled="passwordChangeLoading" class="px-4 py-2 text-xs sm:text-sm rounded-lg bg-purple-600 text-white font-medium hover:bg-purple-700 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed">
+                <button type="submit" :disabled="passwordChangeLoading" class="px-4 py-2 text-xs sm:text-sm rounded-lg bg-gradient-to-r from-[#A5D6A7] to-[#80CBC4] text-white font-medium hover:shadow-lg transform hover:scale-105 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none">
                   <span v-if="passwordChangeLoading">Changement...</span>
                   <span v-else>Changer le mot de passe</span>
                 </button>

@@ -45,7 +45,6 @@ const toISODateString = (date: Date) => {
 const selectedDate = ref<string>(toISODateString(new Date()));
 const selectedMood = ref<MoodEntry | undefined>();
 const showSuccess = ref(false);
-const successMessage = ref("Humeur enregistrée avec succès !");
 const showMoodPopup = ref(false);
 const viewMode = ref<"week" | "month">("week");
 
@@ -118,14 +117,6 @@ const saveMoodEntry = async () => {
       beginAt: new Date().toISOString(),
     });
 
-    successMessage.value = isUpdate
-      ? "Humeur modifiée avec succès !"
-      : "Humeur enregistrée avec succès !";
-    showSuccess.value = true;
-    setTimeout(() => {
-      showSuccess.value = false;
-    }, 3000);
-
     // Recharger les données
     await fetchMoodEntries();
 
@@ -160,11 +151,6 @@ const handlePopupSave = async (data: { mood: MoodType }) => {
     showMoodPopup.value = false;
 
     // Afficher un message de succès
-    successMessage.value = "Humeur enregistrée avec succès !";
-    showSuccess.value = true;
-    setTimeout(() => {
-      showSuccess.value = false;
-    }, 3000);
 
     // Recharger les données
     await fetchMoodEntries();

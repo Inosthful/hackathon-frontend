@@ -1,5 +1,3 @@
-// Types pour l'authentification
-
 export interface User {
   id: number
   email: string

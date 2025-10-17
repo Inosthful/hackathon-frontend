@@ -4,12 +4,12 @@ export type MoodType = 'happy' | 'good' | 'neutral' | 'sad' | 'angry'
 
 export interface MoodEntry {
   id?: number
-  date: string // Format: YYYY-MM-DD
+  date: string
   mood: MoodType
   note?: string
-  intensity?: number // 1-5
-  createdAt?: string
-  updatedAt?: string
+  intensity?: number
+  beginAt?: string
+  endAt?: string
 }
 
 export interface MoodStats {

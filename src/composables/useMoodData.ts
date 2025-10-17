@@ -1,5 +1,3 @@
-// Composable pour gérer les données d'humeur
-
 import { ref, computed } from 'vue'
 import type { MoodEntry, MoodStats, MoodType } from '@/types/mood'
 import { apiService } from '@/services/api'
@@ -46,7 +44,7 @@ export function useMoodData() {
     error.value = null
     try {
       // Vérifier si une humeur existe déjà pour cette date
-      const existing = moodEntries.value.find(entry => entry.date === mood.date)
+      const existing = moodEntries.value.find(entry => (entry.date || '').substring(0, 10) === mood.date)
 
       if (existing && existing.id) {
         // Mettre à jour
@@ -94,30 +92,58 @@ export function useMoodData() {
     return `${year}-${month}-${day}`;
   }
 
+  const toUTCISODateString = (date: Date) => {
+    const year = date.getUTCFullYear();
+    const month = (date.getUTCMonth() + 1).toString().padStart(2, '0');
+    const day = date.getUTCDate().toString().padStart(2, '0');
+    return `${year}-${month}-${day}`;
+  }
+
   // Obtenir les humeurs de la semaine pour la date courante
   const getWeekMoods = () => {
-    const weekStart = new Date(currentDate.value)
-    // Adjust to Monday as the start of the week
-    const day = weekStart.getDay()
-    const diff = weekStart.getDate() - day + (day === 0 ? -6 : 1); // adjust when day is sunday
+    const weekStart = new Date(currentDate.value);
+    const day = weekStart.getDay();
+    const diff = weekStart.getDate() - day + (day === 0 ? -6 : 1);
     weekStart.setDate(diff);
     weekStart.setHours(0, 0, 0, 0);
 
-    const weekDays = []
-    for (let i = 0; i < 7; i++) {
-      const date = new Date(weekStart)
-      date.setDate(weekStart.getDate() + i)
-      const dateStr = toISODateString(date)
+    const weekDays = [];
+    const todayStr = toUTCISODateString(new Date());
 
-      const mood = moodEntries.value.find(entry => entry.date === dateStr)
+    for (let i = 0; i < 7; i++) {
+      const date = new Date(weekStart);
+      date.setDate(weekStart.getDate() + i);
+      const dateStr = toUTCISODateString(date);
+
+      const moodsForDay = moodEntries.value.filter(entry => {
+        const entryDatePart = (entry.date || '').substring(0, 10);
+        const comparisonResult = entryDatePart === dateStr;
+        return comparisonResult;
+      });
+      let representativeMood: MoodEntry | null = null;
+
+      if (moodsForDay.length > 0) {
+        if (dateStr === todayStr) {
+          representativeMood = moodsForDay.sort((a, b) =>
+            new Date(b.beginAt!).getTime() - new Date(a.beginAt!).getTime()
+          )[0];
+        } else {
+          representativeMood = moodsForDay.sort((a, b) => {
+            const durationA = a.endAt ? new Date(a.endAt).getTime() - new Date(a.beginAt!).getTime() : 0;
+            const durationB = b.endAt ? new Date(b.endAt).getTime() - new Date(b.beginAt!).getTime() : 0;
+            return durationB - durationA;
+          })[0];
+        }
+      }
+
       weekDays.push({
         date: dateStr,
         dayName: date.toLocaleDateString('fr-FR', { weekday: 'short' }),
-        mood: mood || null,
-      })
+        mood: representativeMood,
+      });
     }
 
-    return weekDays
+    return weekDays;
   }
 
   // Obtenir les humeurs du mois complet pour la date courante
@@ -140,8 +166,8 @@ export function useMoodData() {
     // Ajouter tous les jours du mois
     for (let i = 1; i <= daysInMonth; i++) {
       const date = new Date(year, monthIndex, i)
-      const dateStr = toISODateString(date)
-      const mood = moodEntries.value.find(entry => entry.date === dateStr)
+      const dateStr = toUTCISODateString(date)
+      const mood = moodEntries.value.find(entry => (entry.date || '').substring(0, 10) === dateStr)
 
       monthDays.push({
         date: dateStr,
@@ -153,7 +179,6 @@ export function useMoodData() {
     return monthDays
   }
 
-  // Calculer les statistiques
   const stats = computed((): MoodStats => {
     if (moodEntries.value.length === 0) {
       return {
@@ -171,18 +196,15 @@ export function useMoodData() {
       }
     }
 
-    // Distribution des humeurs
     const distribution = moodEntries.value.reduce((acc, entry) => {
       acc[entry.mood] = (acc[entry.mood] || 0) + 1
       return acc
     }, {} as Record<MoodType, number>)
 
-    // Humeur la plus fréquente
     const mostFrequent = Object.entries(distribution).reduce((a, b) =>
       a[1] > b[1] ? a : b
     )[0] as MoodType
 
-    // Calcul de la moyenne (convertir les humeurs en valeurs numériques)
     const moodValues: Record<MoodType, number> = {
       angry: 1,
       sad: 2,
@@ -194,7 +216,6 @@ export function useMoodData() {
       moodEntries.value.reduce((sum, entry) => sum + moodValues[entry.mood], 0) /
       moodEntries.value.length
 
-    // Tendance de la semaine
     const weekMoods = getWeekMoods()
     const recentMoods = weekMoods
       .filter(day => day.mood)
@@ -237,8 +258,8 @@ export function useMoodData() {
 
   // Vérifier si une humeur existe pour aujourd'hui
   const hasTodayMood = () => {
-    const today = toISODateString(new Date())
-    return moodEntries.value.some(entry => entry.date === today)
+    const today = toUTCISODateString(new Date())
+    return moodEntries.value.some(entry => (entry.date || '').substring(0, 10) === today)
   }
 
   return {

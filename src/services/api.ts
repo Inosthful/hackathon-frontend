@@ -59,7 +59,7 @@ class ApiService {
     const url = queryString ? `/moods?${queryString}` : '/moods';
 
     const response = await this.api.get(url);
-    return response.data
+    return response.data;
   }
 
   // Récupérer une humeur par date

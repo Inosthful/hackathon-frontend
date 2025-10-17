@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { useAuth } from "@/composables/useAuth";
 import { useMoodData } from "@/composables/useMoodData";
 import type { MoodType } from "@/types/mood";
 import { computed, onMounted, ref } from "vue";
@@ -7,6 +8,7 @@ import { useAuth } from "@/composables/useAuth"; // Added
 import MoodChart from "../components/MoodChart.vue";
 import MoodSelector from "../components/MoodSelector.vue";
 import MoodPopup from "../components/MoodPopup.vue";
+import ThemeToggle from "../components/ThemeToggle.vue";
 
 import WeekView from "../components/WeekView.vue";
 import MonthView from "../components/MonthView.vue";
@@ -16,7 +18,7 @@ import WeekSelector from "../components/WeekSelector.vue";
 const router = useRouter(); // Added
 const route = useRoute(); // Added
 
-const { loading, error, fetchMoodEntries, saveMood, getWeekMoods, getMonthMoods, stats, hasTodayMood } =
+const { loading, error, fetchMoodEntries, saveMood, getWeekMoods, stats, moodEntries, getMonthMoods, hasTodayMood } =
   useMoodData();
 
 const { fetchUser } = useAuth(); // Added
@@ -30,13 +32,25 @@ const toISODateString = (date: Date) => {
   return `${year}-${month}-${day}`;
 };
 
-const selectedDate = ref<string>(toISODateString(new Date()));
+const toUTCISODateString = (date: Date) => {
+  const year = date.getUTCFullYear();
+  const month = (date.getUTCMonth() + 1).toString().padStart(2, "0");
+  const day = date.getUTCDate().toString().padStart(2, "0");
+  return `${year}-${month}-${day}`;
+};
+
+const selectedDate = ref<string>(toUTCISODateString(new Date()));
 const selectedMood = ref<MoodType | undefined>();
 const showNote = ref(false);
 const moodNote = ref("");
 const showSuccess = ref(false);
 const showMoodPopup = ref(false);
-const viewMode = ref<'week' | 'month'>('week'); // Vue par défaut : semaine
+const viewMode = ref<'week' | 'month'>('week');
+
+const selectedMoodTime = computed(() => {
+  if (!selectedMood.value || !selectedMood.value.beginAt) return null;
+  return new Date(selectedMood.value.beginAt).toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' });
+});
 
 const weekDays = computed(() => getWeekMoods());
 const monthDays = computed(() => getMonthMoods());
@@ -52,22 +66,8 @@ onMounted(async () => {
     moodNote.value = currentDayMood.value.note || "";
   }
 
-  // Afficher la popup si aucune humeur n'a été enregistrée aujourd'hui
   if (!hasTodayMood()) {
     showMoodPopup.value = true;
-  }
-
-  // Check for email changed success message
-  if (route.query.email_changed === 'true') {
-    // Fetch updated user data to refresh the auth state
-    await fetchUser(); // Added this line
-
-    emailChangedSuccessMessage.value = 'Votre adresse e-mail a été mise à jour avec succès !';
-    // Clear the query parameter to prevent message from reappearing on refresh
-    router.replace({ query: { ...route.query, email_changed: undefined } });
-    setTimeout(() => {
-      emailChangedSuccessMessage.value = '';
-    }, 5000); // Message disappears after 5 seconds
   }
 });
 
@@ -77,17 +77,12 @@ const handleMoodSelect = (mood: MoodType) => {
 };
 
 const handleDateSelect = (date: string) => {
-  selectedDate.value = date;
-  const dayMood = weekDays.value.find((day) => day.date === date)?.mood;
-  if (dayMood) {
-    selectedMood.value = dayMood.mood;
-    moodNote.value = dayMood.note || "";
-    showNote.value = true;
-  } else {
-    selectedMood.value = undefined;
-    moodNote.value = "";
-    showNote.value = false;
-  }
+  selectedDate.value = toUTCISODateString(new Date(date));
+  const dayMood = weekDays.value.find((day) => day.date === selectedDate.value)?.mood;
+  // On réinitialise toujours pour forcer une sélection manuelle
+  selectedMood.value = dayMood?.mood;
+  moodNote.value = dayMood?.note || "";
+  showNote.value = !!dayMood; // Afficher la note si un mood existe
 };
 
 const saveMoodEntry = async () => {
@@ -98,6 +93,7 @@ const saveMoodEntry = async () => {
       date: selectedDate.value,
       mood: selectedMood.value,
       note: moodNote.value || undefined,
+      beginAt: new Date().toISOString(), // Ajout de l'heure exacte
     });
 
     showSuccess.value = true;

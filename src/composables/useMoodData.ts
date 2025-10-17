@@ -38,28 +38,13 @@ export function useMoodData() {
     }
   }
 
-  // Créer ou mettre à jour une humeur
   const saveMood = async (mood: Omit<MoodEntry, 'id'>) => {
     loading.value = true
     error.value = null
     try {
-      // Vérifier si une humeur existe déjà pour cette date
-      const existing = moodEntries.value.find(entry => (entry.date || '').substring(0, 10) === mood.date)
-
-      if (existing && existing.id) {
-        // Mettre à jour
-        const updated = await apiService.updateMoodEntry(existing.id, mood)
-        const index = moodEntries.value.findIndex(e => e.id === existing.id)
-        if (index !== -1) {
-          moodEntries.value[index] = updated
-        }
-        return updated
-      } else {
-        // Créer
-        const created = await apiService.createMoodEntry(mood)
-        moodEntries.value.push(created)
-        return created
-      }
+      const created = await apiService.createMoodEntry(mood)
+      moodEntries.value.push(created)
+      return created
     } catch (e) {
       error.value = 'Erreur lors de l\'enregistrement de l\'humeur'
       console.error(e)

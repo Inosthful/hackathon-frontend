@@ -34,7 +34,7 @@ const selectDay = (date: string) => emit("selectDate", date);
 
 <template>
   <div
-    class="month-view bg-white/70 dark:bg-gray-800/70 backdrop-blur-xl p-5 sm:p-8 rounded-3xl shadow-2xl border border-gray-200/50 dark:border-gray-700/40 transition-all duration-300"
+    class="month-view bg-white/70 dark:bg-gray-800/70 backdrop-blur-xl p-5 sm:p-8 rounded-3xl shadow-[0_8px_30px_rgb(0,0,0,0.12)] border border-gray-200/30 dark:border-gray-700/30 transition-all duration-300"
   >
     <!-- En-têtes des jours -->
     <div class="grid grid-cols-7 gap-2 mb-4">
@@ -57,24 +57,16 @@ const selectDay = (date: string) => emit("selectDate", date);
         <div
           v-else
           @click="selectDay(day.date)"
-          :class="[
-            'cursor-pointer transition-all duration-300 ease-out',
-            'rounded-2xl aspect-square flex flex-col items-center justify-center',
-            'border shadow-md hover:shadow-lg',
-            'bg-white/60 dark:bg-gray-700/60 backdrop-blur-sm',
-            'hover:scale-105 active:scale-95',
-            isToday(day.date) && 'ring-2 ring-[#8FD9D6]/50 border-[#8FD9D6]',
-            selectedDate === day.date &&
-              'ring-2 ring-[#B2E0B4]/60 border-[#B2E0B4]',
-            !isToday(day.date) &&
-              !selectedDate &&
-              'border-gray-200 dark:border-gray-600',
-          ]"
+          class="cursor-pointer transition-all duration-300 ease-out rounded-2xl aspect-square flex flex-col items-center justify-center shadow-[0_4px_15px_rgb(0,0,0,0.08)] hover:shadow-[0_6px_20px_rgb(0,0,0,0.12)] bg-white/70 dark:bg-gray-700/70 backdrop-blur-sm hover:scale-105 active:scale-95"
           :style="{
-            borderColor:
-              day.mood && !isToday(day.date)
-                ? MOOD_COLORS[day.mood.mood]
-                : undefined,
+            border: selectedDate === day.date
+              ? `3px solid ${day.mood ? MOOD_COLORS[day.mood.mood] : '#B2E0B4'}`
+              : day.mood
+              ? `3px solid ${MOOD_COLORS[day.mood.mood]}`
+              : '3px solid transparent',
+            boxShadow: selectedDate === day.date
+              ? `0 0 15px ${day.mood ? MOOD_COLORS[day.mood.mood] : '#B2E0B4'}66`
+              : undefined
           }"
         >
           <div

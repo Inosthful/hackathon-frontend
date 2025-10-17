@@ -1,34 +1,34 @@
 <script setup lang="ts">
-import {useAuth} from "@/composables/useAuth";
-import {useMoodData} from "@/composables/useMoodData";
-import type {MoodEntry, MoodType} from "@/types/mood";
-import {computed, onMounted, ref} from "vue";
-import {useRoute, useRouter} from "vue-router";
+import { useAuth } from "@/composables/useAuth";
+import { useMoodData } from "@/composables/useMoodData";
+import type { MoodEntry, MoodType } from "@/types/mood";
+import { computed, onMounted, ref } from "vue";
+import { useRoute, useRouter } from "vue-router";
 import MoodChart from "../components/MoodChart.vue";
 import MoodPopup from "../components/MoodPopup.vue";
 import MoodSelector from "../components/MoodSelector.vue";
 import StreakCounter from "../components/StreakCounter.vue";
 
+import WeekSelector from "@/components/WeekSelector.vue";
+import { useWeather } from "@/composables/useWeather";
 import MonthView from "../components/MonthView.vue";
 import WeekView from "../components/WeekView.vue";
 
-import {useWeather} from "@/composables/useWeather";
-
-const {weatherData, fetchWeatherSuggestion} = useWeather();
+const { weatherData, fetchWeatherSuggestion } = useWeather();
 
 const weatherEmoji = computed(() => {
-  if (!weatherData.value) return '❓';
+  if (!weatherData.value) return "❓";
   const code = weatherData.value.weather.weathercode;
   switch (code) {
     case 0:
-      return '☀️';
+      return "☀️";
     case 1:
     case 2:
     case 3:
-      return '☁️';
+      return "☁️";
     case 45:
     case 48:
-      return '🌫️';
+      return "🌫️";
     case 51:
     case 53:
     case 55:
@@ -38,20 +38,20 @@ const weatherEmoji = computed(() => {
     case 80:
     case 81:
     case 82:
-      return '🌧️';
+      return "🌧️";
     case 71:
     case 73:
     case 75:
     case 77:
     case 85:
     case 86:
-      return '❄️';
+      return "❄️";
     case 95:
     case 96:
     case 99:
-      return '⛈️';
+      return "⛈️";
     default:
-      return '❓';
+      return "❓";
   }
 });
 
@@ -72,7 +72,7 @@ const {
   cleanupDuplicates,
 } = useMoodData();
 
-const {fetchUser, user} = useAuth();
+const { fetchUser, user } = useAuth();
 
 const emailChangedSuccessMessage = ref("");
 
@@ -109,16 +109,12 @@ const isSameMood = computed(() => {
 
 const getWeatherForCurrentUserLocation = () => {
   if (navigator.geolocation) {
-    navigator.geolocation.getCurrentPosition(
-        (position) => {
-          fetchWeatherSuggestion(position.coords.latitude, position.coords.longitude);
-        },
-        (error) => {
-          console.error("Error getting user location:", error);
-        }
-    );
-  } else {
-    console.error("Geolocation is not supported by this browser.");
+    navigator.geolocation.getCurrentPosition((position) => {
+      fetchWeatherSuggestion(
+        position.coords.latitude,
+        position.coords.longitude
+      );
+    });
   }
 };
 
@@ -150,7 +146,7 @@ const handleMoodSelect = (mood: MoodType) => {
 const handleDateSelect = (date: string) => {
   selectedDate.value = toISODateString(new Date(date));
   const dayMood = weekDays.value.find(
-      (day) => day.date === selectedDate.value
+    (day) => day.date === selectedDate.value
   )?.mood;
   selectedMood.value = dayMood;
 };
@@ -213,83 +209,83 @@ const handleDeleteMood = async () => {
 
 <template>
   <div
-      class="dashboard min-h-screen bg-[#FAF7F2] dark:bg-gray-900 transition-colors duration-300 relative"
+    class="dashboard min-h-screen bg-[#FAF7F2] dark:bg-gray-900 transition-colors duration-300 relative"
   >
     <div class="absolute top-0 left-0 w-full h-full overflow-hidden z-0">
       <svg
-          width="100%"
-          height="100%"
-          viewBox="0 0 1440 500"
-          preserveAspectRatio="xMidYMid slice"
-          xmlns="http://www.w3.org/2000/svg"
+        width="100%"
+        height="100%"
+        viewBox="0 0 1440 500"
+        preserveAspectRatio="xMidYMid slice"
+        xmlns="http://www.w3.org/2000/svg"
       >
         <defs>
           <radialGradient id="grad1" cx="50%" cy="50%" r="50%">
-            <stop offset="0%" stop-color="rgba(165, 214, 167, 0.3)"/>
-            <stop offset="100%" stop-color="rgba(165, 214, 167, 0)"/>
+            <stop offset="0%" stop-color="rgba(165, 214, 167, 0.3)" />
+            <stop offset="100%" stop-color="rgba(165, 214, 167, 0)" />
           </radialGradient>
           <radialGradient id="grad2" cx="50%" cy="50%" r="50%">
-            <stop offset="0%" stop-color="rgba(128, 203, 196, 0.3)"/>
-            <stop offset="100%" stop-color="rgba(128, 203, 196, 0)"/>
+            <stop offset="0%" stop-color="rgba(128, 203, 196, 0.3)" />
+            <stop offset="100%" stop-color="rgba(128, 203, 196, 0)" />
           </radialGradient>
         </defs>
         <rect
-            x="-20%"
-            y="-20%"
-            width="60%"
-            height="60%"
-            fill="url(#grad1)"
-            transform="rotate(-45)"
+          x="-20%"
+          y="-20%"
+          width="60%"
+          height="60%"
+          fill="url(#grad1)"
+          transform="rotate(-45)"
         />
         <rect
-            x="60%"
-            y="40%"
-            width="60%"
-            height="60%"
-            fill="url(#grad2)"
-            transform="rotate(30)"
+          x="60%"
+          y="40%"
+          width="60%"
+          height="60%"
+          fill="url(#grad2)"
+          transform="rotate(30)"
         />
       </svg>
     </div>
     <MoodPopup
-        :show="showMoodPopup"
-        :loading="loading"
-        @close="handlePopupClose"
-        @save="handlePopupSave"
+      :show="showMoodPopup"
+      :loading="loading"
+      @close="handlePopupClose"
+      @save="handlePopupSave"
     />
 
     <div
-        class="relative z-10 max-w-7xl mx-auto px-4 py-4 sm:py-6 lg:py-8 space-y-4 sm:space-y-6 lg:space-y-8"
+      class="relative z-10 max-w-7xl mx-auto px-4 py-4 sm:py-6 lg:py-8 space-y-4 sm:space-y-6 lg:space-y-8"
     >
       <header class="text-center space-y-1 sm:space-y-2 fade-in">
         <h1
-            class="text-3xl sm:text-4xl lg:text-5xl font-extrabold text-gray-800 dark:text-white tracking-tighter"
+          class="text-3xl sm:text-4xl lg:text-5xl font-extrabold text-gray-800 dark:text-white tracking-tighter"
         >
           <span
-              class="bg-gradient-to-r from-[#A5D6A7] to-[#80CBC4] bg-clip-text text-transparent"
-          >Moodflow+</span
+            class="bg-gradient-to-r from-[#A5D6A7] to-[#80CBC4] bg-clip-text text-transparent"
+            >Moodflow+</span
           >
         </h1>
         <p class="text-gray-600 dark:text-gray-400 text-base sm:text-lg">
           Suivez vos émotions et comprenez-vous mieux
         </p>
-        <StreakCounter v-if="user" :streak="user.joursConsecutifs"/>
+        <StreakCounter v-if="user" :streak="user.joursConsecutifs" />
       </header>
 
       <section class="fade-in relative z-10" style="animation-delay: 0.1s">
-        <WeekSelector :view-mode="viewMode"/>
+        <WeekSelector :view-mode="viewMode" />
       </section>
 
       <section
-          class="fade-in flex justify-center"
-          style="animation-delay: 0.15s"
+        class="fade-in flex justify-center"
+        style="animation-delay: 0.15s"
       >
         <div
-            class="inline-flex rounded-lg border-2 border-gray-300/50 dark:border-gray-600/50 bg-white/60 dark:bg-gray-800/60 backdrop-blur-xl p-1 shadow-xl"
+          class="inline-flex rounded-lg border-2 border-gray-300/50 dark:border-gray-600/50 bg-white/60 dark:bg-gray-800/60 backdrop-blur-xl p-1 shadow-xl"
         >
           <button
-              @click="viewMode = 'week'"
-              :class="[
+            @click="viewMode = 'week'"
+            :class="[
               'px-4 sm:px-6 py-2 rounded-lg text-sm sm:text-base font-medium transition-all duration-200',
               viewMode === 'week'
                 ? 'bg-gradient-to-r from-[#A5D6A7] to-[#80CBC4] text-white shadow-lg'
@@ -299,8 +295,8 @@ const handleDeleteMood = async () => {
             📅 Semaine
           </button>
           <button
-              @click="viewMode = 'month'"
-              :class="[
+            @click="viewMode = 'month'"
+            :class="[
               'px-4 sm:px-6 py-2 rounded-lg text-sm sm:text-base font-medium transition-all duration-200',
               viewMode === 'month'
                 ? 'bg-gradient-to-r from-[#A5D6A7] to-[#80CBC4] text-white shadow-lg'
@@ -313,53 +309,52 @@ const handleDeleteMood = async () => {
       </section>
 
       <section
-          v-if="viewMode === 'week'"
-          class="fade-in"
-          style="animation-delay: 0.2s"
+        v-if="viewMode === 'week'"
+        class="fade-in"
+        style="animation-delay: 0.2s"
       >
         <WeekView
-            :weekDays="weekDays"
-            :selectedDate="selectedDate"
-            @selectDate="handleDateSelect"
+          :weekDays="weekDays"
+          :selectedDate="selectedDate"
+          @selectDate="handleDateSelect"
         />
       </section>
 
       <section
-          v-if="viewMode === 'month'"
-          class="fade-in"
-          style="animation-delay: 0.2s"
+        v-if="viewMode === 'month'"
+        class="fade-in"
+        style="animation-delay: 0.2s"
       >
         <MonthView
-            :monthDays="monthDays"
-            :selectedDate="selectedDate"
-            @selectDate="handleDateSelect"
+          :monthDays="monthDays"
+          :selectedDate="selectedDate"
+          @selectDate="handleDateSelect"
         />
       </section>
 
       <section class="fade-in" style="animation-delay: 0.3s">
         <div
-            class="bg-white/70 dark:bg-gray-800/70 backdrop-blur-xl p-4 sm:p-6 lg:p-8 rounded-3xl shadow-[0_8px_30px_rgb(0,0,0,0.12)]"
+          class="bg-white/70 dark:bg-gray-800/70 backdrop-blur-xl p-4 sm:p-6 lg:p-8 rounded-3xl shadow-[0_8px_30px_rgb(0,0,0,0.12)]"
         >
           <MoodSelector
-              :selectedMood="selectedMoodType"
-              :disabled="loading"
-              @select="handleMoodSelect"
+            :selectedMood="selectedMoodType"
+            :disabled="loading"
+            @select="handleMoodSelect"
           />
-
 
           <div class="mt-6 flex justify-end gap-3">
             <button
-                v-if="currentDayMood"
-                @click="handleDeleteMood"
-                :disabled="loading"
-                class="px-6 py-3 rounded-lg bg-red-500 text-white font-medium shadow-lg hover:shadow-xl hover:bg-red-600 transform hover:scale-105 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none"
+              v-if="currentDayMood"
+              @click="handleDeleteMood"
+              :disabled="loading"
+              class="px-6 py-3 rounded-lg bg-red-500 text-white font-medium shadow-lg hover:shadow-xl hover:bg-red-600 transform hover:scale-105 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none"
             >
               {{ loading ? "Suppression..." : "Supprimer" }}
             </button>
             <button
-                @click="saveMoodEntry"
-                :disabled="!selectedMood || loading || isSameMood"
-                class="px-6 py-3 rounded-lg bg-gradient-to-r from-[#A5D6A7] to-[#80CBC4] text-white font-medium shadow-lg hover:shadow-xl transform hover:scale-105 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none"
+              @click="saveMoodEntry"
+              :disabled="!selectedMood || loading || isSameMood"
+              class="px-6 py-3 rounded-lg bg-gradient-to-r from-[#A5D6A7] to-[#80CBC4] text-white font-medium shadow-lg hover:shadow-xl transform hover:scale-105 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none"
             >
               {{ loading ? "Enregistrement..." : "Enregistrer" }}
             </button>
@@ -367,18 +362,27 @@ const handleDeleteMood = async () => {
         </div>
       </section>
 
-      <section v-if="weatherData" class="fade-in" style="animation-delay: 0.35s">
+      <section
+        v-if="weatherData"
+        class="fade-in"
+        style="animation-delay: 0.35s"
+      >
         <div
-            class="bg-white/70 dark:bg-gray-800/70 backdrop-blur-xl p-4 sm:p-6 lg:p-8 rounded-3xl shadow-[0_8px_30px_rgb(0,0,0,0.12)]"
+          class="bg-white/70 dark:bg-gray-800/70 backdrop-blur-xl p-4 sm:p-6 lg:p-8 rounded-3xl shadow-[0_8px_30px_rgb(0,0,0,0.12)]"
         >
-          <h3 class="text-lg font-medium text-gray-800 dark:text-gray-200 text-center mb-4">
+          <h3
+            class="text-lg font-medium text-gray-800 dark:text-gray-200 text-center mb-4"
+          >
             Suggestion Météo
           </h3>
           <div class="text-center">
             <span class="text-5xl">{{ weatherEmoji }}</span>
             <p class="text-gray-600 dark:text-gray-400 mt-2">
               Aujourd'hui à {{ weatherData.city }}, le temps est
-              <span class="font-semibold">{{ weatherData.suggestion.mood }}</span>.
+              <span class="font-semibold">{{
+                weatherData.suggestion.mood
+              }}</span
+              >.
               {{ weatherData.suggestion.sentence }}
             </p>
           </div>
@@ -386,33 +390,33 @@ const handleDeleteMood = async () => {
       </section>
 
       <section
-          v-if="stats.totalEntries > 0"
-          class="fade-in"
-          style="animation-delay: 0.3s"
+        v-if="stats.totalEntries > 0"
+        class="fade-in"
+        style="animation-delay: 0.3s"
       >
         <h2
-            class="text-xl sm:text-2xl lg:text-3xl font-bold mb-4 sm:mb-6 text-gray-800 dark:text-gray-200 text-center"
+          class="text-xl sm:text-2xl lg:text-3xl font-bold mb-4 sm:mb-6 text-gray-800 dark:text-gray-200 text-center"
         >
           Tes statistiques
         </h2>
-        <MoodChart :stats="stats"/>
+        <MoodChart :stats="stats" />
       </section>
 
       <section
-          v-else
-          class="text-center p-6 sm:p-8 lg:p-12 bg-white/70 dark:bg-gray-800/70 backdrop-blur-xl rounded-3xl shadow-[0_8px_30px_rgb(0,0,0,0.12)] fade-in"
-          style="animation-delay: 0.3s"
+        v-else
+        class="text-center p-6 sm:p-8 lg:p-12 bg-white/70 dark:bg-gray-800/70 backdrop-blur-xl rounded-3xl shadow-[0_8px_30px_rgb(0,0,0,0.12)] fade-in"
+        style="animation-delay: 0.3s"
       >
         <div class="text-4xl sm:text-5xl lg:text-6xl mb-3 sm:mb-4">📝</div>
         <p
-            class="text-base sm:text-lg lg:text-xl text-gray-600 dark:text-gray-400"
+          class="text-base sm:text-lg lg:text-xl text-gray-600 dark:text-gray-400"
         >
           Commence à enregistrer tes humeurs pour voir tes statistiques !
         </p>
       </section>
 
       <footer
-          class="text-center py-4 sm:py-6 lg:py-8 text-gray-600 dark:text-gray-400"
+        class="text-center py-4 sm:py-6 lg:py-8 text-gray-600 dark:text-gray-400"
       >
         <p class="text-xs sm:text-sm">
           Conçu avec soin pour votre épanouissement

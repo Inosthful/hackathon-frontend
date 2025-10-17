@@ -75,7 +75,6 @@ const handleSubmit = async () => {
     setTimeout(() => (successMessage.value = ""), 4000);
   } catch (error) {
     errorMessage.value = "Un problème est survenu. Veuillez réessayer.";
-    console.error(error);
     setTimeout(() => (errorMessage.value = ""), 4000);
   } finally {
     loading.value = false;

@@ -2,7 +2,7 @@
   <div ref="counterElement" class="streak-counter">
     <span class="flame-emoji" :class="flameClass">🔥</span>
     <span class="streak-value" :class="flameClass">{{ streak }}</span>
-    <span class="streak-label">jours de suite !</span>
+    <span class="streak-label">jour{{ streak > 1 ? 's' : '' }} de suite</span>
   </div>
 </template>
 

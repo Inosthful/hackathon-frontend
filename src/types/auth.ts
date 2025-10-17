@@ -1,22 +1,25 @@
 export interface User {
-  id: number
-  email: string
-  username: string
-  createdAt?: string
+  id: number;
+  adresseMail: string;
+  nom: string;
+  prenom: string;
+  dateAnniversaire: string;
+  joursConsecutifs: number;
+  derniereConnexion: string;
 }
 
 export interface LoginCredentials {
-  email: string
-  password: string
+  email: string;
+  password: string;
 }
 
 export interface RegisterData {
-  lastName: string
-  firstName: string
-  email: string
-  birthDate: string
-  password: string
-  passwordConfirm: string
+  nom: string;
+  prenom: string;
+  adresseMail: string;
+  dateAnniversaire: string;
+  password: string;
+  passwordConfirm: string;
 }
 
 export interface AuthResponse {

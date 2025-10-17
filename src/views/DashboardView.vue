@@ -7,7 +7,7 @@ import { useAuth } from "@/composables/useAuth"; // Added
 import MoodChart from "../components/MoodChart.vue";
 import MoodSelector from "../components/MoodSelector.vue";
 import MoodPopup from "../components/MoodPopup.vue";
-import ThemeToggle from "../components/ThemeToggle.vue";
+import StreakCounter from '../components/StreakCounter.vue';
 
 import WeekView from "../components/WeekView.vue";
 import MonthView from "../components/MonthView.vue";
@@ -20,7 +20,7 @@ const route = useRoute(); // Added
 const { loading, error, fetchMoodEntries, saveMood, getWeekMoods, stats, moodEntries, getMonthMoods, hasTodayMood } =
   useMoodData();
 
-const { fetchUser } = useAuth(); // Added
+const { fetchUser, user } = useAuth(); // Added
 
 const emailChangedSuccessMessage = ref(''); // Added
 
@@ -170,6 +170,7 @@ const handlePopupSave = async (data: { mood: MoodType; note?: string }) => {
         <p class="text-gray-600 dark:text-gray-400 text-base sm:text-lg">
           Ton journal d'humeur intelligent
         </p>
+        <StreakCounter v-if="user" :streak="user.joursConsecutifs" />
       </header>
 
       <Transition name="slide-fade">

@@ -51,7 +51,7 @@ export function useAuth() {
     error.value = null
 
     try {
-      const response = await apiClient.post<{ token: string }>('/auth/login', credentials)
+      const response = await apiClient.post<{ token: string }>('/auth/login', { email: credentials.email, password: credentials.password });
       const authToken = response.data.token
 
       token.value = authToken
@@ -90,11 +90,11 @@ export function useAuth() {
     }
 
     try {
-      const response = await apiClient.post<AuthResponse>('/auth/register', {
-        lastName: data.lastName,
-        firstName: data.firstName,
-        email: data.email,
-        birthDate: data.birthDate,
+      const response = await apiClient.post<AuthResponse>('/register', {
+        nom: data.lastName,
+        prenom: data.firstName,
+        adresseMail: data.email,
+        dateAnniversaire: data.birthDate,
         password: data.password,
       })
 
